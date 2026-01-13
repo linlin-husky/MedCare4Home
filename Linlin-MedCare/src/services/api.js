@@ -628,5 +628,40 @@ export {
   getPublicUserProfile,
   getDashboardAnalytics,
   getAdminOverview,
-  requestToBorrow
+  requestToBorrow,
+
+  // Medical Tests
+  getMedicalTests: () => fetch('/api/medical-tests', { credentials: 'include' })
+    .then(response => response.ok ? response.json() : Promise.reject(response.json())),
+
+    addMedicalTest: (testData) => fetch('/api/medical-tests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(testData)
+    })
+      .then(response => response.ok ? response.json() : Promise.reject(response.json())),
+
+      updateMedicalTest: (id, testData) => fetch(`/api/medical-tests/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(testData)
+      })
+        .then(response => response.ok ? response.json() : Promise.reject(response.json())),
+
+        deleteMedicalTest: (id) => fetch(`/api/medical-tests/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        })
+          .then(response => response.ok ? response.json() : Promise.reject(response.json())),
+
+          filterMedicalTestsByStatus: (status) => fetch(`/api/medical-tests/filter/status/${status}`, { credentials: 'include' })
+            .then(response => response.ok ? response.json() : Promise.reject(response.json())),
+
+            filterMedicalTestsByCategory: (category) => fetch(`/api/medical-tests/filter/category/${category}`, { credentials: 'include' })
+              .then(response => response.ok ? response.json() : Promise.reject(response.json())),
+
+              searchMedicalTests: (query) => fetch(`/api/medical-tests/search/${encodeURIComponent(query)}`, { credentials: 'include' })
+                .then(response => response.ok ? response.json() : Promise.reject(response.json()))
 };

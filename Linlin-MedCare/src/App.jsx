@@ -7,6 +7,7 @@ import LoginForm from './components/LoginForm.jsx';
 import RegisterForm from './components/RegisterForm.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import Calendar from './components/Calendar.jsx';
+import MedicalTests from './components/MedicalTests.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import ErrorMessage from './components/ErrorMessage.jsx';
 import SuccessMessage from './components/SuccessMessage.jsx';
@@ -105,6 +106,7 @@ function App() {
 
         {state.currentPage === 'dashboard' && <Dashboard user={state.user} />}
         {state.currentPage === 'calendar' && <Calendar user={state.user} />}
+        {state.currentPage === 'tests' && <MedicalTests user={state.user} />}
         {/* Placeholder for other pages */}
         {state.currentPage !== 'dashboard' && state.currentPage !== 'calendar' && (
           <div style={{ padding: '20px', textAlign: 'center' }}>
