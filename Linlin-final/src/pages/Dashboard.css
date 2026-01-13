@@ -1,0 +1,386 @@
+.dashboard-title {
+  font-size: 2rem;
+}
+
+.date-note,
+.description-type,
+.modal-date-hint {
+  margin-left: 8px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.dashboard-content {
+  min-height: 100vh;
+  margin: 2rem;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+}
+
+.dashboard-section {
+  grid-column: span 6;
+  border: 1px solid #ccc;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 30rem;
+}
+
+.dashboard-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+  min-height: 3.2rem;
+}
+
+.dashboard-section h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4a3456;
+}
+
+.add-item-button {
+  margin-left: 1rem;
+  background: #eee;
+  color: #543366;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-item-button:hover {
+  background: #e0d7ec;
+}
+
+.modal-hidden {
+  display: none !important;
+}
+
+.modal-button-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.go-button {
+  margin-top: auto;
+  align-self: flex-start;
+  margin-left: 0;
+  background-color: rgb(130, 121, 228);
+  color: #fff;
+}
+
+.go-button:hover {
+  background-color: #7c6eea;
+}
+
+.modal-button-success {
+  background: #4caf50;
+  color: white;
+}
+
+.dashboard-top-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-bottom: 2.5rem;
+  gap: 2.5rem;
+}
+
+.dashboard-profile-col {
+  flex: 0 0 220px;
+  min-width: 180px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.dashboard-reminder-col {
+  flex: 1 1 500px;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.item-lend-date {
+  color: #1976d2;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+.item-delete-button,
+.lend-gallery .item-delete-button {
+  background: #d32f2f;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 1.1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.item-delete-button {
+  margin-left: 1rem;
+}
+
+.item-delete-button:hover,
+.lend-gallery .item-delete-button:hover {
+  background: #a31515;
+}
+
+.item-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item-row {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: #faf7fd;
+  box-shadow: 0 0 0.5rem #e5e1f7;
+  margin-bottom: 2rem;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #3a2d4d;
+  margin-right: 0.5rem;
+}
+
+.item-owner {
+  color: #888;
+  margin-right: 0.5rem;
+}
+
+.item-borrowed {
+  color: #b07b2a;
+  margin-left: 0.5rem;
+}
+
+.item-borrow-date {
+  color: #555;
+  margin-left: 0.5rem;
+}
+
+.item-due-date {
+  color: #b00;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+.item-action-row,
+.lend-gallery .item-action-row {
+  margin-top: auto;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.item-action-button,
+.lend-gallery .item-action-button {
+  margin-left: auto;
+  background: #6c4a7c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.item-action-button:hover,
+.lend-gallery .item-action-button:hover {
+  background: #543366;
+}
+
+.item-empty {
+  color: #aaa;
+  font-style: italic;
+  padding: 0.7rem 0.5rem;
+  list-style-type: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  min-width: 320px;
+  max-width: 95vw;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  color: #6c4a7c;
+  text-align: center;
+}
+
+.modal-content form>div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.modal-content label {
+  flex: 0 0 120px;
+  text-align: left;
+  font-weight: 500;
+  color: #5a3a6b;
+  margin-right: 1rem;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="date"],
+.modal-content select,
+.modal-content textarea {
+  flex: 1;
+  font-size: 1.1rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #d1c4e9;
+  background: #f8f6fa;
+  color: #5a3a6b;
+  box-sizing: border-box;
+}
+
+.modal-content select {
+  min-width: 0;
+}
+
+.modal-content button[type="submit"] {
+  background: #6c4a7c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-content button[type="submit"]:hover {
+  background: #543366;
+}
+
+.modal-content button[type="button"] {
+  background: #eee;
+  color: #444;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-content button[type="button"]:hover {
+  background: #ccc;
+}
+
+.back-button {
+  margin: 1rem;
+}
+
+.review-all-user-button {
+  background: #eee;
+  color: #543366;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 1rem;
+}
+
+.review-all-user-button:hover {
+  background: #e0d7ec;
+}
+
+.my-reserving-section .item-row,
+.my-borrowing-section .item-row,
+.available-to-borrow-section .item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 2rem;
+  border-radius: 16px;
+  background: #faf7fd;
+  box-shadow: 0 0 0.5rem #e5e1f7;
+  margin-bottom: 1.5rem;
+  min-height: 64px;
+}
+
+.my-reserving-section .item-info,
+.my-borrowing-section .item-info,
+.available-to-borrow-section .item-info {
+  flex: 1;
+  text-align: left;
+  font-size: 1.1rem;
+  color: #5a3a6b;
+}
+
+.my-reserving-section .item-action-row,
+.my-borrowing-section .item-action-row,
+.available-to-borrow-section .item-action-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.return-action-buttons {
+  gap: 1rem;
+  justify-content: center;
+}
+
+.form-error {
+  color: #d32f2f;
+}

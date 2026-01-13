@@ -1,0 +1,26 @@
+.page-title {
+    text-align: center;
+}
+
+.privacy-update {
+    text-align: center;
+}
+
+.privacy-subtitle {
+    margin-top: 2rem;
+    margin-bottom: 0;
+    padding: 0;
+    margin-left: 1rem;
+
+    text-align: left;
+}
+
+.privacy__content {
+    padding: 0;
+    margin-left: 1rem;
+
+    font-size: 1.2rem;
+    text-align: left;
+
+    color: var(--color-text);
+}

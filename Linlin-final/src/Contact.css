@@ -1,0 +1,22 @@
+.page-title {
+    margin-top: 4rem;
+    font-size: 2rem;
+
+    text-align: center;
+}
+
+.contactpage__content--others {
+    color: var(--color-text);
+    font-size: 1.2rem;
+    padding: 1rem;
+
+    text-align: center;
+}
+
+.contactpage__content {
+    color: var(--color-text);
+    font-size: 1.2rem;
+    font-weight: 700;
+
+    text-align: center;
+}

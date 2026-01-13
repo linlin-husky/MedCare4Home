@@ -1,0 +1,65 @@
+.reminder-section {
+  background: #f8f6fa;
+  border-radius: 10px;
+  padding: 1.2rem 2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(108, 74, 124, 0.06);
+}
+
+.reminder-section h2 {
+  color: #6c4a7c;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.reminder-item.overdue {
+  border: 2px solid #e53935;
+  background: #fff0f0;
+}
+
+.reminder-overdue {
+  color: #e53935;
+  font-weight: bold;
+  margin-left: 1rem;
+}
+
+.reminder-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.reminder-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+
+.reminder-item {
+  background: #fff;
+  border-radius: 6px;
+  margin-bottom: 0.7rem;
+  padding: 0.7rem 1.2rem;
+  box-shadow: 0 1px 4px rgba(108, 74, 124, 0.07);
+  font-size: 1.05rem;
+  color: #3a2d4d;
+  display: flex;
+  flex-direction: column;
+}
+
+.reminder-item strong {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.reminder-empty {
+  color: #aaa;
+  font-style: italic;
+  padding: 0.7rem 0.5rem;
+}
+
+.reminder-content {
+  color: #6c4a7c;
+}

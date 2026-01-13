@@ -1,0 +1,161 @@
+.borrow-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2em;
+}
+
+.borrow-title {
+    margin-bottom: 1rem;
+
+    text-align: center;
+    font-size: 2rem;
+
+    color: var(--color-panel-text);
+}
+
+.reserve-title {
+    text-align: center;
+    font-size: 2rem;
+}
+
+.filter-controls {
+    margin-bottom: 2em;
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+}
+
+.filter-item {
+    background: #eaeaf6;
+    color: #4a3c6e;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.filter-item.active,
+.filter-item:hover {
+    background: #7c5fe6;
+    color: #fff;
+}
+
+.item-row {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    margin-bottom: 1.5em;
+    padding: 1.2em 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.item-name {
+    font-weight: 600;
+    color: #2d3a4a;
+}
+
+.item-description {
+    color: #444;
+    font-size: 0.98em;
+    margin-bottom: 0.3em;
+}
+
+.item-lend-date,
+.item-due-date {
+    color: #7c5fe6;
+    font-size: 0.95em;
+    margin-left: 0.5em;
+}
+
+.item-row-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.item-action-button,
+.reserve-button {
+    background: #2d7ff9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: 0.5em;
+    transition: background 0.2s;
+}
+
+.item-action-button:hover,
+.reserve-button:hover {
+    background: #195bb5;
+}
+
+.item-empty {
+    text-align: center;
+    color: #888;
+    font-size: 1.1em;
+    margin: 2em 0;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    margin: 2em 0;
+}
+
+.pagination-controls button {
+    background: #eaeaf6;
+    color: #4a3c6e;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pagination-controls button:disabled {
+    background: #f3f3f3;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.pagination-controls span {
+    font-size: 1em;
+    color: #4a3c6e;
+    font-weight: 500;
+}
+
+@media (max-width: 700px) {
+    .borrow-page {
+        padding: 1em 0.5em;
+        max-width: 98vw;
+    }
+
+    .item-row {
+        padding: 1em 0.5em;
+    }
+
+    .reserve-button {
+        margin-left: 8px;
+    }
+
+    .filter-controls {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+
+        margin: 2rem 0;
+    }
+}

@@ -1,0 +1,90 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+#root {
+  margin: 0 auto;
+}
+
+html {
+  font-family: system-ui, sans-serif;
+}
+
+p {
+  padding: 0.5rem;
+}
+
+.load-indicator {
+  margin-top: 4rem;
+
+  text-align: center;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.error-message {
+  border: 1px solid #ffcdd2;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-top: 2rem;
+
+  text-align: center;
+
+  color: #d32f2f;
+  background: #ffebee;
+}
+
+.back-login-button {
+  margin: 1rem auto;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+
+  font-size: 1.1rem;
+
+  background-color: #f0f1f2;
+  color: rgb(46, 44, 44);
+}
+
+.back-login-button:hover {
+  background-color: #e0e1e2;
+}
+
+.lend-page,
+.borrow-page,
+.discovery-page,
+.reserve-page {
+  max-width: 900px;
+  min-width: 600px;
+  margin: 2em auto;
+  background: #f9f9fc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 2em 1.5em;
+}
+
+.back-button {
+  background: #7c5fe6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7em 1.5em;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.back-button:hover {
+  background: #4a3c6e;
+}
+
+.footer {
+  margin-top: auto;
+}

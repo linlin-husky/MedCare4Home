@@ -1,0 +1,26 @@
+.page-title {
+    text-align: center;
+}
+
+.socialpage__content {
+    font-size: 1.5rem;
+    text-align: center;
+
+    color: var(--color-text);
+}
+
+.socialpage__list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 2rem;
+}
+
+.socialpage__list--detail {
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+
+    font-size: 1.2rem;
+    text-align: center;
+
+    color: var(--color-text);
+}

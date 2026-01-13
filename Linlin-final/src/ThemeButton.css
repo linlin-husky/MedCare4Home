@@ -1,0 +1,28 @@
+.theme-buttons {
+    text-align: right;
+}
+
+.theme-buttons .button {
+    border-radius: 3rem;
+}
+
+.theme-buttons .theme-buttons {
+    border-radius: 3rem;
+
+    background-color: white;
+}
+
+.theme-buttons .theme-selected {
+    background-color: dodgerblue;
+}
+
+.theme-buttons button {
+    color: var(--theme-btn-text);
+}
+
+.theme-buttons button:hover {
+    cursor: pointer;
+
+    background-color: var(--theme-btn-highlight);
+    color: var(--theme-btn-text-hover);
+}

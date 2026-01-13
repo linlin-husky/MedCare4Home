@@ -1,0 +1,14 @@
+.item-actions-right {
+    margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.my-reserving-item {
+    border: 1px solid #e0d7ec;
+    background: #faf6ff;
+    border-radius: 8px;
+    padding: 0.7rem 1.2rem;
+    margin-bottom: 0.7rem;
+    box-shadow: 0 1px 4px rgba(108, 74, 124, 0.04);
+}

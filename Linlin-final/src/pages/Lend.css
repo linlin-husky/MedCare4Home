@@ -1,0 +1,178 @@
+.lend-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+
+    margin-bottom: 2rem;
+}
+
+.lend-title {
+    margin-bottom: 1rem;
+    margin-left: 13rem;
+
+    text-align: center;
+    font-size: 2rem;
+
+    color: var(--color-panel-text);
+}
+
+.filter-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+
+    margin-bottom: 2rem;
+}
+
+.filter-item {
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    background: #eaeaf6;
+    color: #4a3c6e;
+}
+
+.filter-item.active,
+.filter-item:hover {
+    background: #7c5fe6;
+    color: #fff;
+}
+
+.item-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    margin-bottom: 1.5rem;
+    padding: 1.2rem 1rem;
+
+    background: #fff;
+}
+
+.item-name {
+    font-weight: 600;
+
+    color: #2d3a4a;
+}
+
+.item-description {
+    font-size: 0.98rem;
+    margin-bottom: 0.3rem;
+
+    color: #444;
+}
+
+.item-lend-date,
+.item-due-date {
+    margin-left: 0.5rem;
+
+    font-size: 0.95rem;
+
+    color: #7c5fe6;
+}
+
+.item-row-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: auto;
+
+    text-align: center;
+}
+
+.item-action-button,
+.reserve-button {
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: background 0.2s;
+
+    background: #2d7ff9;
+    color: #fff;
+}
+
+.item-action-button:hover,
+.reserve-button:hover {
+    background: #195bb5;
+}
+
+.item-empty {
+    margin: 2rem 0;
+
+    text-align: center;
+    font-size: 1.1rem;
+
+    color: #888;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    margin: 2rem 0;
+}
+
+.pagination-controls button {
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    font-size: 1rem;
+
+    background: #eaeaf6;
+    color: #4a3c6e;
+}
+
+.pagination-controls button:disabled {
+    cursor: not-allowed;
+
+    background: #f3f3f3;
+    color: #aaa;
+}
+
+.pagination-controls span {
+    font-size: 1rem;
+    font-weight: 500;
+
+    color: #4a3c6e;
+}
+
+@media (max-width: 700px) {
+    .lend-page {
+        padding: 1rem 0.5rem;
+    }
+
+    .item-row {
+        padding: 1rem 0.5rem;
+    }
+
+    .reserve-button {
+        margin-left: 8px;
+    }
+
+    .filter-controls {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+
+        margin: 2rem 0;
+    }
+}
