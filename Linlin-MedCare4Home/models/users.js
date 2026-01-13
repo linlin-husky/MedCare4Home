@@ -7,6 +7,14 @@ const userSchema = new mongoose.Schema({
   displayName: { type: String, required: true },
   email: { type: String }, // Optional
   phone: { type: String }, // Optional
+
+  // Medical Profile
+  height: { type: Number }, // in cm or ft/in (store as cm standard maybe, or string if user enters string)
+  weight: { type: Number }, // in lbs
+  bmi: { type: Number },
+  bloodType: { type: String },
+  birthDate: { type: Date },
+
   trustScore: { type: Number, default: 50 },
   totalLendings: { type: Number, default: 0 },
   totalBorrowings: { type: Number, default: 0 },

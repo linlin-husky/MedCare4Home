@@ -5,12 +5,12 @@ function fetchSession() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function register(username, displayName, email, phone) {
@@ -20,12 +20,12 @@ function register(username, displayName, email, phone) {
     credentials: 'include',
     body: JSON.stringify({ username, displayName, email, phone })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function login(username) {
@@ -35,12 +35,12 @@ function login(username) {
     credentials: 'include',
     body: JSON.stringify({ username })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function logout() {
@@ -48,12 +48,12 @@ function logout() {
     method: 'POST',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getItems() {
@@ -61,12 +61,12 @@ function getItems() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getItem(itemId) {
@@ -74,12 +74,12 @@ function getItem(itemId) {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function createItem(itemData) {
@@ -89,12 +89,12 @@ function createItem(itemData) {
     credentials: 'include',
     body: JSON.stringify(itemData)
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function updateItem(itemId, updates) {
@@ -104,12 +104,12 @@ function updateItem(itemId, updates) {
     credentials: 'include',
     body: JSON.stringify(updates)
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function deleteItem(itemId) {
@@ -117,12 +117,12 @@ function deleteItem(itemId) {
     method: 'DELETE',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getPublicItems(filters) {
@@ -138,12 +138,12 @@ function getPublicItems(filters) {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function searchItems(query, ownerOnly) {
@@ -154,12 +154,12 @@ function searchItems(query, ownerOnly) {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getCategories() {
@@ -167,12 +167,12 @@ function getCategories() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getConditions() {
@@ -180,12 +180,12 @@ function getConditions() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getLendings() {
@@ -193,12 +193,12 @@ function getLendings() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getActiveLendings() {
@@ -206,12 +206,12 @@ function getActiveLendings() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getBorrowings() {
@@ -219,12 +219,12 @@ function getBorrowings() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getActiveBorrowings() {
@@ -232,12 +232,12 @@ function getActiveBorrowings() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getPendingRequests() {
@@ -245,12 +245,12 @@ function getPendingRequests() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getOverdueLendings() {
@@ -258,12 +258,12 @@ function getOverdueLendings() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getLending(lendingId) {
@@ -271,12 +271,12 @@ function getLending(lendingId) {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function createLending(lendingData) {
@@ -286,12 +286,12 @@ function createLending(lendingData) {
     credentials: 'include',
     body: JSON.stringify(lendingData)
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function acceptLending(lendingId) {
@@ -299,12 +299,12 @@ function acceptLending(lendingId) {
     method: 'POST',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function declineLending(lendingId, reason) {
@@ -314,12 +314,12 @@ function declineLending(lendingId, reason) {
     credentials: 'include',
     body: JSON.stringify({ reason })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function negotiateLending(lendingId, newTerms, message) {
@@ -329,12 +329,12 @@ function negotiateLending(lendingId, newTerms, message) {
     credentials: 'include',
     body: JSON.stringify({ newTerms, message })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function requestExtension(lendingId, newReturnDate, reason) {
@@ -344,12 +344,12 @@ function requestExtension(lendingId, newReturnDate, reason) {
     credentials: 'include',
     body: JSON.stringify({ newReturnDate, reason })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function respondToExtension(lendingId, approved) {
@@ -359,12 +359,12 @@ function respondToExtension(lendingId, approved) {
     credentials: 'include',
     body: JSON.stringify({ approved })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function initiateReturn(lendingId) {
@@ -372,12 +372,12 @@ function initiateReturn(lendingId) {
     method: 'POST',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function confirmReturn(lendingId, condition, notes) {
@@ -387,12 +387,12 @@ function confirmReturn(lendingId, condition, notes) {
     credentials: 'include',
     body: JSON.stringify({ condition, notes })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function rateLending(lendingId, rating, isLenderRating) {
@@ -402,12 +402,12 @@ function rateLending(lendingId, rating, isLenderRating) {
     credentials: 'include',
     body: JSON.stringify({ rating, isLenderRating })
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getItemHistory(itemId) {
@@ -415,12 +415,12 @@ function getItemHistory(itemId) {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getActivities() {
@@ -428,12 +428,12 @@ function getActivities() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getUnreadActivityCount() {
@@ -441,12 +441,12 @@ function getUnreadActivityCount() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function markActivityAsRead(activityId) {
@@ -454,12 +454,12 @@ function markActivityAsRead(activityId) {
     method: 'PATCH',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function searchUsers(query) {
@@ -467,12 +467,12 @@ function searchUsers(query) {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getUserProfile() {
@@ -480,12 +480,12 @@ function getUserProfile() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function updateUserProfile(updates) {
@@ -495,12 +495,12 @@ function updateUserProfile(updates) {
     credentials: 'include',
     body: JSON.stringify(updates)
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getPublicUserProfile(username) {
@@ -508,12 +508,12 @@ function getPublicUserProfile(username) {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getDashboardAnalytics() {
@@ -521,12 +521,12 @@ function getDashboardAnalytics() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function getAdminOverview() {
@@ -534,12 +534,12 @@ function getAdminOverview() {
     method: 'GET',
     credentials: 'include'
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 function requestToBorrow(itemId, requestData) {
@@ -549,12 +549,41 @@ function requestToBorrow(itemId, requestData) {
     credentials: 'include',
     body: JSON.stringify(requestData)
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => Promise.reject(err));
-    }
-    return response.json();
-  });
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
+}
+
+
+function getAppointments() {
+  return fetch('/api/appointments', {
+    method: 'GET',
+    credentials: 'include'
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
+}
+
+function createAppointment(apptData) {
+  return fetch('/api/appointments', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(apptData)
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    });
 }
 
 export {
@@ -562,6 +591,8 @@ export {
   register,
   login,
   logout,
+  getAppointments,
+  createAppointment, // Export new functions
   getItems,
   getItem,
   createItem,

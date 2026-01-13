@@ -6,18 +6,19 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 
-import usersModel from './models/users.js';
-import itemsModel from './models/items.js';
-import lendingsModel from './models/lendings.js';
-import activitiesModel from './models/activities.js';
-import sessionsModel from './models/sessions.js';
+// Models
+import users from './models/users.js';
+import sessions from './models/sessions.js';
+import appointments from './models/appointments.js';
+import medications from './models/medications.js';
+import vitals from './models/vitals.js';
 
-import authRoutes from './routes/auth.js';
-import itemRoutes from './routes/items.js';
-import lendingRoutes from './routes/lendings.js';
-import activityRoutes from './routes/activities.js';
-import userRoutes from './routes/users.js';
-import analyticsRoutes from './routes/analytics.js';
+// Route Generators
+import createAuthRoutes from './routes/auth.js';
+import createUserRoutes from './routes/users.js';
+import createAppointmentRoutes from './routes/appointments.js';
+import createMedicationRoutes from './routes/medications.js';
+import createVitalsRoutes from './routes/vitals.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,19 +33,19 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 // Models object to pass to routes (now wrappers around Mongoose)
 const models = {
-  sessions: sessionsModel,
-  users: usersModel,
-  items: itemsModel,
-  lendings: lendingsModel,
-  activities: activitiesModel
+  users,
+  sessions,
+  appointments,
+  medications,
+  vitals
 };
 
-app.use('/api/auth', authRoutes(models));
-app.use('/api/items', itemRoutes(models));
-app.use('/api/lendings', lendingRoutes(models));
-app.use('/api/activities', activityRoutes(models));
-app.use('/api/users', userRoutes(models));
-app.use('/api/analytics', analyticsRoutes(models));
+// API Routes
+app.use('/api/auth', createAuthRoutes(models));
+app.use('/api/users', createUserRoutes(models));
+app.use('/api/appointments', createAppointmentRoutes(models));
+app.use('/api/medications', createMedicationRoutes(models));
+app.use('/api/vitals', createVitalsRoutes(models));
 
 app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
