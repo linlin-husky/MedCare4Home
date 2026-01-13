@@ -6,17 +6,21 @@ function createUserRoutes(models) {
   const router = express.Router();
   const { sessions, users } = models;
 
-  function requireAuth(req, res, next) {
+  const requireAuth = async (req, res, next) => {
     const sid = req.cookies.sid;
-    if (!sid || !sessions.isValidSession(sid)) {
+    if (!sid) {
       return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
     }
-    req.username = sessions.getUsername(sid);
+    const isValid = await sessions.isValidSession(sid);
+    if (!isValid) {
+      return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
+    }
+    req.username = await sessions.getUsername(sid);
     next();
-  }
+  };
 
-  router.get('/profile', requireAuth, (req, res) => {
-    const user = users.getUser(req.username);
+  router.get('/profile', requireAuth, async (req, res) => {
+    const user = await users.getUser(req.username);
     if (!user) {
       return res.status(404).json({ error: 'not-found', message: 'User not found' });
     }
@@ -36,14 +40,14 @@ function createUserRoutes(models) {
     });
   });
 
-  router.put('/profile', requireAuth, (req, res) => {
+  router.put('/profile', requireAuth, async (req, res) => {
     const { displayName, email, phone } = req.body;
 
     if (email && !email.includes('@')) {
       return res.status(400).json({ error: 'invalid-email', message: 'Invalid email format' });
     }
 
-    const updatedUser = users.updateUser(req.username, { displayName, email, phone });
+    const updatedUser = await users.updateUser(req.username, { displayName, email, phone });
 
     if (!updatedUser) {
       return res.status(404).json({ error: 'not-found', message: 'User not found' });
@@ -59,15 +63,15 @@ function createUserRoutes(models) {
     });
   });
 
-  router.get('/search', requireAuth, (req, res) => {
+  router.get('/search', requireAuth, async (req, res) => {
     const query = req.query.q || '';
-    
+
     if (query.length < 2) {
       return res.json({ users: [] });
     }
 
-    const searchResults = users.searchUsers(query);
-    
+    const searchResults = await users.searchUsers(query);
+
     const filteredResults = searchResults.filter(
       user => user.username !== req.username
     );
@@ -75,9 +79,9 @@ function createUserRoutes(models) {
     res.json({ users: filteredResults });
   });
 
-  router.get('/:username', requireAuth, (req, res) => {
+  router.get('/:username', requireAuth, async (req, res) => {
     const { username } = req.params;
-    const profile = users.getPublicProfile(username);
+    const profile = await users.getPublicProfile(username);
 
     if (!profile) {
       return res.status(404).json({ error: 'not-found', message: 'User not found' });
@@ -90,4 +94,3 @@ function createUserRoutes(models) {
 }
 
 export default createUserRoutes;
-

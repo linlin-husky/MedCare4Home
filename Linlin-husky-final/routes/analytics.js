@@ -6,39 +6,45 @@ function createAnalyticsRoutes(models) {
   const router = express.Router();
   const { sessions, users, items, lendings } = models;
 
-  function requireAuth(req, res, next) {
+  const requireAuth = async (req, res, next) => {
     const sid = req.cookies.sid;
-    if (!sid || !sessions.isValidSession(sid)) {
+    if (!sid) {
       return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
     }
-    req.username = sessions.getUsername(sid);
+    const isValid = await sessions.isValidSession(sid);
+    if (!isValid) {
+      return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
+    }
+    req.username = await sessions.getUsername(sid);
     next();
-  }
+  };
 
-  function requireAdmin(req, res, next) {
+  const requireAdmin = async (req, res, next) => {
     if (!users.isAdmin(req.username)) {
       return res.status(403).json({ error: 'admin-required', message: 'Admin access required' });
     }
     next();
-  }
+  };
 
-  router.get('/dashboard', requireAuth, (req, res) => {
-    const userItems = items.getUserItems(req.username);
-    const userLendings = lendings.getUserLendings(req.username);
-    const userBorrowings = lendings.getUserBorrowings(req.username);
-    const activeLendings = lendings.getActiveLendings(req.username);
-    const activeBorrowings = lendings.getActiveBorrowings(req.username);
-    const overdueLendings = lendings.getOverdueLendings(req.username);
-    const overdueBorrowings = lendings.getOverdueBorrowings(req.username);
-    const user = users.getUser(req.username);
+  router.get('/dashboard', requireAuth, async (req, res) => {
+    const userItems = await items.getUserItems(req.username);
+    const userLendings = await lendings.getUserLendings(req.username);
+    const userBorrowings = await lendings.getUserBorrowings(req.username);
+    const activeLendings = await lendings.getActiveLendings(req.username);
+    const activeBorrowings = await lendings.getActiveBorrowings(req.username);
+    const overdueLendings = await lendings.getOverdueLendings(req.username);
+    const overdueBorrowings = await lendings.getOverdueBorrowings(req.username);
+    const user = await users.getUser(req.username);
 
     const availableItems = userItems.filter(item => item.status === 'available');
     const lentItems = userItems.filter(item => item.status === 'lent');
 
-    const totalValueOnLoan = activeLendings.reduce((sum, lending) => {
-      const item = items.getItem(lending.itemId);
-      return sum + (item ? item.estimatedValue : 0);
-    }, 0);
+    // Need to get items for active lendings to calculate value
+    let totalValueOnLoan = 0;
+    for (const lending of activeLendings) {
+      const item = await items.getItem(lending.itemId);
+      totalValueOnLoan += (item ? item.estimatedValue : 0);
+    }
 
     const completedBorrowings = userBorrowings.filter(b => b.status === 'completed');
     const onTimeReturns = completedBorrowings.filter(
@@ -60,8 +66,8 @@ function createAnalyticsRoutes(models) {
         activeBorrowings: activeBorrowings.length,
         overdueBorrowings: overdueBorrowings.length,
         completedBorrowings: completedBorrowings.length,
-        onTimeRate: completedBorrowings.length > 0 
-          ? Math.round((onTimeReturns / completedBorrowings.length) * 100) 
+        onTimeRate: completedBorrowings.length > 0
+          ? Math.round((onTimeReturns / completedBorrowings.length) * 100)
           : 100
       },
       trust: {
@@ -74,9 +80,11 @@ function createAnalyticsRoutes(models) {
     });
   });
 
-  router.get('/admin/overview', requireAuth, requireAdmin, (req, res) => {
-    const allUsers = users.getAllUsers();
-    const allActiveLendings = lendings.getAllActiveLendings();
+  router.get('/admin/overview', requireAuth, requireAdmin, async (req, res) => {
+    const allUsers = await users.getAllUsers();
+
+    // getAllActiveLendings is already async in our model
+    const allActiveLendings = await lendings.getAllActiveLendings();
 
     const trustDistribution = {
       elite: 0,

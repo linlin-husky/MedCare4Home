@@ -1,11 +1,28 @@
 "use strict";
 
-const users = {};
+import mongoose from 'mongoose';
+
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true, lowercase: true },
+  displayName: { type: String, required: true },
+  email: { type: String }, // Optional
+  phone: { type: String }, // Optional
+  trustScore: { type: Number, default: 50 },
+  totalLendings: { type: Number, default: 0 },
+  totalBorrowings: { type: Number, default: 0 },
+  onTimeReturns: { type: Number, default: 0 },
+  lateReturns: { type: Number, default: 0 },
+  disputesAgainst: { type: Number, default: 0 },
+  totalRatings: { type: Number, default: 0 },
+  ratingSum: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+  lastActive: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema);
 
 const BANNED_USERS = ['dog'];
-
 const ADMIN_USERS = ['admin'];
-
 const DEFAULT_TRUST_SCORE = 50;
 
 function sanitizeInput(input) {
@@ -34,134 +51,130 @@ function isAdmin(username) {
   return ADMIN_USERS.includes(username.toLowerCase());
 }
 
-function userExists(username) {
-  return Boolean(users[username.toLowerCase()]);
+async function userExists(username) {
+  const count = await User.countDocuments({ username: username.toLowerCase() });
+  return count > 0;
 }
 
-function createUser(username, displayName, email, phone) {
+async function createUser(username, displayName, email, phone) {
   const sanitizedUsername = sanitizeInput(username).toLowerCase();
   const sanitizedDisplayName = sanitizeInput(displayName) || sanitizedUsername;
   const sanitizedEmail = sanitizeInput(email);
   const sanitizedPhone = sanitizeInput(phone);
-  
-  if (users[sanitizedUsername]) {
+
+  if (await userExists(sanitizedUsername)) {
     return { success: false, reason: 'Username already exists' };
   }
-  
-  users[sanitizedUsername] = {
-    username: sanitizedUsername,
-    displayName: sanitizedDisplayName,
-    email: sanitizedEmail,
-    phone: sanitizedPhone,
-    trustScore: DEFAULT_TRUST_SCORE,
-    totalLendings: 0,
-    totalBorrowings: 0,
-    onTimeReturns: 0,
-    lateReturns: 0,
-    disputesAgainst: 0,
-    totalRatings: 0,
-    ratingSum: 0,
-    createdAt: Date.now(),
-    lastActive: Date.now()
-  };
-  
-  return { success: true, user: users[sanitizedUsername] };
-}
 
-function getUser(username) {
-  return users[username.toLowerCase()] || null;
-}
-
-function updateUser(username, updates) {
-  const user = users[username.toLowerCase()];
-  if (!user) {
-    return null;
+  try {
+    const newUser = new User({
+      username: sanitizedUsername,
+      displayName: sanitizedDisplayName,
+      email: sanitizedEmail,
+      phone: sanitizedPhone
+    });
+    await newUser.save();
+    return { success: true, user: newUser.toObject() };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return { success: false, reason: 'Database error' };
   }
-  
+}
+
+async function getUser(username) {
+  const user = await User.findOne({ username: username.toLowerCase() });
+  return user ? user.toObject() : null;
+}
+
+async function updateUser(username, updates) {
   const allowedUpdates = ['displayName', 'email', 'phone'];
+  const updateFields = {};
+
   for (const key of allowedUpdates) {
     if (updates[key] !== undefined) {
-      user[key] = sanitizeInput(updates[key]);
+      updateFields[key] = sanitizeInput(updates[key]);
     }
   }
-  user.lastActive = Date.now();
-  return user;
+  updateFields.lastActive = Date.now();
+
+  const user = await User.findOneAndUpdate(
+    { username: username.toLowerCase() },
+    { $set: updateFields },
+    { new: true }
+  );
+
+  return user ? user.toObject() : null;
 }
 
-function updateTrustScore(username) {
-  const user = users[username.toLowerCase()];
+async function updateTrustScore(username) {
+  const user = await User.findOne({ username: username.toLowerCase() });
   if (!user) {
     return;
   }
-  
+
   let score = DEFAULT_TRUST_SCORE;
-  
+
   const totalTransactions = user.onTimeReturns + user.lateReturns;
   if (totalTransactions > 0) {
     const onTimeRate = user.onTimeReturns / totalTransactions;
     score += Math.round(onTimeRate * 30);
   }
-  
+
   if (user.totalRatings > 0) {
     const avgRating = user.ratingSum / user.totalRatings;
     score += Math.round((avgRating / 5) * 15);
   }
-  
+
   const transactionBonus = Math.min(10, Math.floor(totalTransactions / 5));
   score += transactionBonus;
-  
+
   score -= user.disputesAgainst * 5;
-  
+
   score = Math.max(0, Math.min(100, score));
   user.trustScore = score;
-  
+
+  await user.save();
   return score;
 }
 
-function addRating(username, rating) {
-  const user = users[username.toLowerCase()];
-  if (!user) {
-    return;
-  }
+async function addRating(username, rating) {
+  const user = await User.findOne({ username: username.toLowerCase() });
+  if (!user) return;
+
   user.totalRatings += 1;
   user.ratingSum += rating;
-  updateTrustScore(username);
+  await user.save();
+  await updateTrustScore(username);
 }
 
-function recordReturn(username, isOnTime) {
-  const user = users[username.toLowerCase()];
-  if (!user) {
-    return;
-  }
+async function recordReturn(username, isOnTime) {
+  const user = await User.findOne({ username: username.toLowerCase() });
+  if (!user) return;
+
   if (isOnTime) {
     user.onTimeReturns += 1;
   } else {
     user.lateReturns += 1;
   }
-  updateTrustScore(username);
+  await user.save();
+  await updateTrustScore(username);
 }
 
-function recordDispute(username) {
-  const user = users[username.toLowerCase()];
-  if (!user) {
-    return;
-  }
+async function recordDispute(username) {
+  const user = await User.findOne({ username: username.toLowerCase() });
+  if (!user) return;
+
   user.disputesAgainst += 1;
-  updateTrustScore(username);
+  await user.save();
+  await updateTrustScore(username);
 }
 
-function incrementLendings(username) {
-  const user = users[username.toLowerCase()];
-  if (user) {
-    user.totalLendings += 1;
-  }
+async function incrementLendings(username) {
+  await User.updateOne({ username: username.toLowerCase() }, { $inc: { totalLendings: 1 } });
 }
 
-function incrementBorrowings(username) {
-  const user = users[username.toLowerCase()];
-  if (user) {
-    user.totalBorrowings += 1;
-  }
+async function incrementBorrowings(username) {
+  await User.updateOne({ username: username.toLowerCase() }, { $inc: { totalBorrowings: 1 } });
 }
 
 function getTrustBadge(score) {
@@ -180,8 +193,8 @@ function getTrustBadge(score) {
   return { badge: 'Caution', color: 'red' };
 }
 
-function getPublicProfile(username) {
-  const user = users[username.toLowerCase()];
+async function getPublicProfile(username) {
+  const user = await getUser(username);
   if (!user) {
     return null;
   }
@@ -192,25 +205,53 @@ function getPublicProfile(username) {
     badge: getTrustBadge(user.trustScore),
     totalLendings: user.totalLendings,
     totalBorrowings: user.totalBorrowings,
-    onTimeRate: user.onTimeReturns + user.lateReturns > 0 
-      ? Math.round((user.onTimeReturns / (user.onTimeReturns + user.lateReturns)) * 100) 
+    onTimeRate: user.onTimeReturns + user.lateReturns > 0
+      ? Math.round((user.onTimeReturns / (user.onTimeReturns + user.lateReturns)) * 100)
       : 100,
     memberSince: user.createdAt
   };
 }
 
-function getAllUsers() {
-  return Object.values(users).map(user => getPublicProfile(user.username));
+async function getAllUsers() {
+  const users = await User.find({});
+  // This might be expensive if many users, for now keep it simple map
+  // Note: getPublicProfile is async so need to Promise.all
+  // Alternatively mapping directly from the user doc since we have it
+  return users.map(user => ({
+    username: user.username,
+    displayName: user.displayName,
+    trustScore: user.trustScore,
+    badge: getTrustBadge(user.trustScore),
+    totalLendings: user.totalLendings,
+    totalBorrowings: user.totalBorrowings,
+    onTimeRate: user.onTimeReturns + user.lateReturns > 0
+      ? Math.round((user.onTimeReturns / (user.onTimeReturns + user.lateReturns)) * 100)
+      : 100,
+    memberSince: user.createdAt
+  }));
 }
 
-function searchUsers(query) {
+async function searchUsers(query) {
   const searchTerm = sanitizeInput(query).toLowerCase();
-  return Object.values(users)
-    .filter(user => 
-      user.username.includes(searchTerm) || 
-      user.displayName.toLowerCase().includes(searchTerm)
-    )
-    .map(user => getPublicProfile(user.username));
+  const users = await User.find({
+    $or: [
+      { username: { $regex: searchTerm, $options: 'i' } },
+      { displayName: { $regex: searchTerm, $options: 'i' } }
+    ]
+  });
+
+  return users.map(user => ({
+    username: user.username,
+    displayName: user.displayName,
+    trustScore: user.trustScore,
+    badge: getTrustBadge(user.trustScore),
+    totalLendings: user.totalLendings,
+    totalBorrowings: user.totalBorrowings,
+    onTimeRate: user.onTimeReturns + user.lateReturns > 0
+      ? Math.round((user.onTimeReturns / (user.onTimeReturns + user.lateReturns)) * 100)
+      : 100,
+    memberSince: user.createdAt
+  }));
 }
 
 export default {
@@ -233,4 +274,3 @@ export default {
   getAllUsers,
   searchUsers
 };
-

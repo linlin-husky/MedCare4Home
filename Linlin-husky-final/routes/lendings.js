@@ -6,137 +6,141 @@ function createLendingRoutes(models) {
   const router = express.Router();
   const { sessions, users, items, lendings, activities } = models;
 
-  function requireAuth(req, res, next) {
+  const requireAuth = async (req, res, next) => {
     const sid = req.cookies.sid;
-    if (!sid || !sessions.isValidSession(sid)) {
+    if (!sid) {
       return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
     }
-    req.username = sessions.getUsername(sid);
+    const isValid = await sessions.isValidSession(sid);
+    if (!isValid) {
+      return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
+    }
+    req.username = await sessions.getUsername(sid);
     next();
-  }
+  };
 
-  router.get('/', requireAuth, (req, res) => {
-    const userLendings = lendings.getUserLendings(req.username);
-    
-    const enrichedLendings = userLendings.map(lending => ({
+  router.get('/', requireAuth, async (req, res) => {
+    const userLendings = await lendings.getUserLendings(req.username);
+
+    const enrichedLendings = await Promise.all(userLendings.map(async lending => ({
       ...lending,
-      item: items.getItem(lending.itemId),
-      borrower: lending.borrowerUsername ? users.getPublicProfile(lending.borrowerUsername) : null
+      item: await items.getItem(lending.itemId),
+      borrower: lending.borrowerUsername ? await users.getPublicProfile(lending.borrowerUsername) : null
+    })));
+
+    res.json({ lendings: enrichedLendings });
+  });
+
+  router.get('/active', requireAuth, async (req, res) => {
+    const activeLendings = await lendings.getActiveLendings(req.username);
+
+    const enrichedLendings = await Promise.all(activeLendings.map(async lending => {
+      const now = Date.now();
+      const daysUntilDue = Math.ceil((lending.terms.expectedReturnDate - now) / (24 * 60 * 60 * 1000));
+
+      return {
+        ...lending,
+        item: await items.getItem(lending.itemId),
+        borrower: lending.borrowerUsername ? await users.getPublicProfile(lending.borrowerUsername) : null,
+        daysUntilDue,
+        isOverdue: daysUntilDue < 0
+      };
     }));
 
     res.json({ lendings: enrichedLendings });
   });
 
-  router.get('/active', requireAuth, (req, res) => {
-    const activeLendings = lendings.getActiveLendings(req.username);
-    
-    const enrichedLendings = activeLendings.map(lending => {
+  router.get('/borrowings', requireAuth, async (req, res) => {
+    const userBorrowings = await lendings.getUserBorrowings(req.username);
+
+    const enrichedBorrowings = await Promise.all(userBorrowings.map(async lending => {
       const now = Date.now();
       const daysUntilDue = Math.ceil((lending.terms.expectedReturnDate - now) / (24 * 60 * 60 * 1000));
-      
+
       return {
         ...lending,
-        item: items.getItem(lending.itemId),
-        borrower: lending.borrowerUsername ? users.getPublicProfile(lending.borrowerUsername) : null,
+        item: await items.getItem(lending.itemId),
+        lender: await users.getPublicProfile(lending.lenderUsername),
         daysUntilDue,
         isOverdue: daysUntilDue < 0
       };
-    });
-
-    res.json({ lendings: enrichedLendings });
-  });
-
-  router.get('/borrowings', requireAuth, (req, res) => {
-    const userBorrowings = lendings.getUserBorrowings(req.username);
-    
-    const enrichedBorrowings = userBorrowings.map(lending => {
-      const now = Date.now();
-      const daysUntilDue = Math.ceil((lending.terms.expectedReturnDate - now) / (24 * 60 * 60 * 1000));
-      
-      return {
-        ...lending,
-        item: items.getItem(lending.itemId),
-        lender: users.getPublicProfile(lending.lenderUsername),
-        daysUntilDue,
-        isOverdue: daysUntilDue < 0
-      };
-    });
-
-    res.json({ borrowings: enrichedBorrowings });
-  });
-
-  router.get('/borrowings/active', requireAuth, (req, res) => {
-    const activeBorrowings = lendings.getActiveBorrowings(req.username);
-    
-    const enrichedBorrowings = activeBorrowings.map(lending => {
-      const now = Date.now();
-      const daysUntilDue = Math.ceil((lending.terms.expectedReturnDate - now) / (24 * 60 * 60 * 1000));
-      
-      return {
-        ...lending,
-        item: items.getItem(lending.itemId),
-        lender: users.getPublicProfile(lending.lenderUsername),
-        daysUntilDue,
-        isOverdue: daysUntilDue < 0
-      };
-    });
-
-    res.json({ borrowings: enrichedBorrowings });
-  });
-
-  router.get('/pending', requireAuth, (req, res) => {
-    const pendingRequests = lendings.getPendingRequests(req.username);
-    
-    const enrichedRequests = pendingRequests.map(lending => ({
-      ...lending,
-      item: items.getItem(lending.itemId),
-      lender: users.getPublicProfile(lending.lenderUsername),
-      borrower: lending.borrowerUsername ? users.getPublicProfile(lending.borrowerUsername) : null
     }));
+
+    res.json({ borrowings: enrichedBorrowings });
+  });
+
+  router.get('/borrowings/active', requireAuth, async (req, res) => {
+    const activeBorrowings = await lendings.getActiveBorrowings(req.username);
+
+    const enrichedBorrowings = await Promise.all(activeBorrowings.map(async lending => {
+      const now = Date.now();
+      const daysUntilDue = Math.ceil((lending.terms.expectedReturnDate - now) / (24 * 60 * 60 * 1000));
+
+      return {
+        ...lending,
+        item: await items.getItem(lending.itemId),
+        lender: await users.getPublicProfile(lending.lenderUsername),
+        daysUntilDue,
+        isOverdue: daysUntilDue < 0
+      };
+    }));
+
+    res.json({ borrowings: enrichedBorrowings });
+  });
+
+  router.get('/pending', requireAuth, async (req, res) => {
+    const pendingRequests = await lendings.getPendingRequests(req.username);
+
+    const enrichedRequests = await Promise.all(pendingRequests.map(async lending => ({
+      ...lending,
+      item: await items.getItem(lending.itemId),
+      lender: await users.getPublicProfile(lending.lenderUsername),
+      borrower: lending.borrowerUsername ? await users.getPublicProfile(lending.borrowerUsername) : null
+    })));
 
     res.json({ requests: enrichedRequests });
   });
 
-  router.get('/overdue', requireAuth, (req, res) => {
-    const overdueLendings = lendings.getOverdueLendings(req.username);
-    
-    const enrichedLendings = overdueLendings.map(lending => {
+  router.get('/overdue', requireAuth, async (req, res) => {
+    const overdueLendings = await lendings.getOverdueLendings(req.username);
+
+    const enrichedLendings = await Promise.all(overdueLendings.map(async lending => {
       const now = Date.now();
       const daysOverdue = Math.ceil((now - lending.terms.expectedReturnDate) / (24 * 60 * 60 * 1000));
-      
+
       return {
         ...lending,
-        item: items.getItem(lending.itemId),
-        borrower: lending.borrowerUsername ? users.getPublicProfile(lending.borrowerUsername) : null,
+        item: await items.getItem(lending.itemId),
+        borrower: lending.borrowerUsername ? await users.getPublicProfile(lending.borrowerUsername) : null,
         daysOverdue
       };
-    });
+    }));
 
     res.json({ lendings: enrichedLendings });
   });
 
-  router.get('/due-soon', requireAuth, (req, res) => {
+  router.get('/due-soon', requireAuth, async (req, res) => {
     const days = parseInt(req.query.days, 10) || 3;
-    const dueSoonLendings = lendings.getDueSoonLendings(req.username, days);
-    
-    const enrichedLendings = dueSoonLendings.map(lending => {
+    const dueSoonLendings = await lendings.getDueSoonLendings(req.username, days);
+
+    const enrichedLendings = await Promise.all(dueSoonLendings.map(async lending => {
       const now = Date.now();
       const daysUntilDue = Math.ceil((lending.terms.expectedReturnDate - now) / (24 * 60 * 60 * 1000));
-      
+
       return {
         ...lending,
-        item: items.getItem(lending.itemId),
-        borrower: lending.borrowerUsername ? users.getPublicProfile(lending.borrowerUsername) : null,
+        item: await items.getItem(lending.itemId),
+        borrower: lending.borrowerUsername ? await users.getPublicProfile(lending.borrowerUsername) : null,
         daysUntilDue
       };
-    });
+    }));
 
     res.json({ lendings: enrichedLendings });
   });
 
-  router.get('/item/:itemId/history', requireAuth, (req, res) => {
+  router.get('/item/:itemId/history', requireAuth, async (req, res) => {
     const { itemId } = req.params;
-    const item = items.getItem(itemId);
+    const item = await items.getItem(itemId);
 
     if (!item) {
       return res.status(404).json({ error: 'not-found', message: 'Item not found' });
@@ -146,19 +150,19 @@ function createLendingRoutes(models) {
       return res.status(403).json({ error: 'forbidden', message: 'Not authorized' });
     }
 
-    const history = lendings.getLendingHistory(itemId);
-    
-    const enrichedHistory = history.map(lending => ({
+    const history = await lendings.getLendingHistory(itemId);
+
+    const enrichedHistory = await Promise.all(history.map(async lending => ({
       ...lending,
-      borrower: lending.borrowerUsername ? users.getPublicProfile(lending.borrowerUsername) : lending.borrowerInfo
-    }));
+      borrower: lending.borrowerUsername ? await users.getPublicProfile(lending.borrowerUsername) : lending.borrowerInfo
+    })));
 
     res.json({ history: enrichedHistory });
   });
 
-  router.get('/:lendingId', requireAuth, (req, res) => {
+  router.get('/:lendingId', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
-    const lending = lendings.getLending(lendingId);
+    const lending = await lendings.getLending(lendingId);
 
     if (!lending) {
       return res.status(404).json({ error: 'not-found', message: 'Lending not found' });
@@ -176,9 +180,9 @@ function createLendingRoutes(models) {
 
     const enrichedLending = {
       ...lending,
-      item: items.getItem(lending.itemId),
-      lender: users.getPublicProfile(lending.lenderUsername),
-      borrower: lending.borrowerUsername ? users.getPublicProfile(lending.borrowerUsername) : null,
+      item: await items.getItem(lending.itemId),
+      lender: await users.getPublicProfile(lending.lenderUsername),
+      borrower: lending.borrowerUsername ? await users.getPublicProfile(lending.borrowerUsername) : null,
       daysUntilDue,
       isOverdue: daysUntilDue < 0,
       isLender,
@@ -188,14 +192,14 @@ function createLendingRoutes(models) {
     res.json({ lending: enrichedLending });
   });
 
-  router.post('/', requireAuth, (req, res) => {
+  router.post('/', requireAuth, async (req, res) => {
     const { itemId, borrower, terms } = req.body;
 
     if (!itemId) {
       return res.status(400).json({ error: 'required-item', message: 'Item is required' });
     }
 
-    const item = items.getItem(itemId);
+    const item = await items.getItem(itemId);
     if (!item) {
       return res.status(404).json({ error: 'not-found', message: 'Item not found' });
     }
@@ -217,7 +221,8 @@ function createLendingRoutes(models) {
     }
 
     if (borrower.username) {
-      if (!users.userExists(borrower.username)) {
+      const exists = await users.userExists(borrower.username);
+      if (!exists) {
         return res.status(400).json({ error: 'borrower-not-found', message: 'Borrower not found on platform' });
       }
       if (borrower.username.toLowerCase() === req.username) {
@@ -233,7 +238,7 @@ function createLendingRoutes(models) {
       return res.status(400).json({ error: 'required-deposit', message: 'Deposit amount must be greater than zero' });
     }
 
-    const result = lendings.createLending(req.username, borrower, itemId, {
+    const result = await lendings.createLending(req.username, borrower, itemId, {
       ...terms,
       conditionAtLending: item.condition
     });
@@ -243,13 +248,13 @@ function createLendingRoutes(models) {
     }
 
     if (!borrower.username) {
-      items.setItemLent(itemId, result.lending.id);
-      users.incrementLendings(req.username);
+      await items.setItemLent(itemId, result.lending.id);
+      await users.incrementLendings(req.username);
     }
 
     if (borrower.username) {
-      const lender = users.getUser(req.username);
-      activities.notifyLendingRequest(
+      const lender = await users.getUser(req.username);
+      await activities.notifyLendingRequest(
         borrower.username,
         lender.displayName,
         item.name,
@@ -260,40 +265,40 @@ function createLendingRoutes(models) {
     res.status(201).json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/accept', requireAuth, (req, res) => {
+  router.post('/:lendingId/accept', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
 
-    const lending = lendings.getLending(lendingId);
+    const lending = await lendings.getLending(lendingId);
     if (!lending) {
       return res.status(404).json({ error: 'not-found', message: 'Lending not found' });
     }
 
-    const result = lendings.acceptLending(lendingId, req.username);
+    const result = await lendings.acceptLending(lendingId, req.username);
 
     if (!result.success) {
-      const statusCode = result.reason.includes('not found') ? 404 : 
-                        result.reason.includes('authorized') || result.reason.includes('Only') ? 403 : 400;
+      const statusCode = result.reason.includes('not found') ? 404 :
+        result.reason.includes('authorized') || result.reason.includes('Only') ? 403 : 400;
       return res.status(statusCode).json({ error: 'accept-failed', message: result.reason });
     }
 
-    items.setItemLent(result.lending.itemId, lendingId);
-    users.incrementLendings(result.lending.lenderUsername);
+    await items.setItemLent(result.lending.itemId, lendingId);
+    await users.incrementLendings(result.lending.lenderUsername);
     if (result.lending.borrowerUsername) {
-      users.incrementBorrowings(result.lending.borrowerUsername);
+      await users.incrementBorrowings(result.lending.borrowerUsername);
     }
 
-    const item = items.getItem(result.lending.itemId);
-    const accepter = users.getUser(req.username);
-    
+    const item = await items.getItem(result.lending.itemId);
+    const accepter = await users.getUser(req.username);
+
     if (lending.isBorrowRequest) {
-      activities.addActivity(
+      await activities.addActivity(
         result.lending.borrowerUsername,
         'lending_accepted',
         accepter.displayName + ' approved your request to borrow "' + item.name + '"',
         lendingId
       );
     } else {
-      activities.notifyLendingAccepted(
+      await activities.notifyLendingAccepted(
         result.lending.lenderUsername,
         accepter.displayName,
         item.name,
@@ -304,27 +309,27 @@ function createLendingRoutes(models) {
     res.json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/decline', requireAuth, (req, res) => {
+  router.post('/:lendingId/decline', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
     const { reason } = req.body;
 
-    const lending = lendings.getLending(lendingId);
+    const lending = await lendings.getLending(lendingId);
     if (!lending) {
       return res.status(404).json({ error: 'not-found', message: 'Lending not found' });
     }
 
-    const result = lendings.declineLending(lendingId, req.username, reason);
+    const result = await lendings.declineLending(lendingId, req.username, reason);
 
     if (!result.success) {
       return res.status(400).json({ error: 'decline-failed', message: result.reason });
     }
 
-    const item = items.getItem(lending.itemId);
-    const decliner = users.getUser(req.username);
-    
+    const item = await items.getItem(lending.itemId);
+    const decliner = await users.getUser(req.username);
+
     if (lending.isBorrowRequest) {
       if (lending.borrowerUsername) {
-        activities.addActivity(
+        await activities.addActivity(
           lending.borrowerUsername,
           'lending_declined',
           decliner.displayName + ' declined your request to borrow "' + item.name + '"',
@@ -333,7 +338,7 @@ function createLendingRoutes(models) {
       }
     } else {
       if (lending.lenderUsername !== req.username) {
-        activities.notifyLendingDeclined(
+        await activities.notifyLendingDeclined(
           lending.lenderUsername,
           decliner.displayName,
           item.name,
@@ -345,7 +350,7 @@ function createLendingRoutes(models) {
     res.json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/negotiate', requireAuth, (req, res) => {
+  router.post('/:lendingId/negotiate', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
     const { newTerms, message } = req.body;
 
@@ -353,12 +358,12 @@ function createLendingRoutes(models) {
       return res.status(400).json({ error: 'required-terms', message: 'New terms are required' });
     }
 
-    const lending = lendings.getLending(lendingId);
+    const lending = await lendings.getLending(lendingId);
     if (!lending) {
       return res.status(404).json({ error: 'not-found', message: 'Lending not found' });
     }
 
-    const result = lendings.proposeDifferentTerms(lendingId, req.username, newTerms, message);
+    const result = await lendings.proposeDifferentTerms(lendingId, req.username, newTerms, message);
 
     if (!result.success) {
       return res.status(400).json({ error: 'negotiate-failed', message: result.reason });
@@ -367,7 +372,7 @@ function createLendingRoutes(models) {
     res.json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/extension', requireAuth, (req, res) => {
+  router.post('/:lendingId/extension', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
     const { newReturnDate, reason } = req.body;
 
@@ -375,17 +380,17 @@ function createLendingRoutes(models) {
       return res.status(400).json({ error: 'required-date', message: 'New return date is required' });
     }
 
-    const result = lendings.requestExtension(lendingId, req.username, newReturnDate, reason);
+    const result = await lendings.requestExtension(lendingId, req.username, newReturnDate, reason);
 
     if (!result.success) {
-      const statusCode = result.reason === 'Lending not found' ? 404 : 
-                        result.reason === 'Not authorized' ? 403 : 400;
+      const statusCode = result.reason === 'Lending not found' ? 404 :
+        result.reason === 'Not authorized' ? 403 : 400;
       return res.status(statusCode).json({ error: 'extension-failed', message: result.reason });
     }
 
-    const item = items.getItem(result.lending.itemId);
-    const borrower = users.getUser(req.username);
-    activities.notifyExtensionRequested(
+    const item = await items.getItem(result.lending.itemId);
+    const borrower = await users.getUser(req.username);
+    await activities.notifyExtensionRequested(
       result.lending.lenderUsername,
       borrower.displayName,
       item.name,
@@ -395,7 +400,7 @@ function createLendingRoutes(models) {
     res.json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/extension/respond', requireAuth, (req, res) => {
+  router.post('/:lendingId/extension/respond', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
     const { approved } = req.body;
 
@@ -403,26 +408,26 @@ function createLendingRoutes(models) {
       return res.status(400).json({ error: 'required-response', message: 'Approval response is required' });
     }
 
-    const result = lendings.respondToExtension(lendingId, req.username, approved);
+    const result = await lendings.respondToExtension(lendingId, req.username, approved);
 
     if (!result.success) {
-      const statusCode = result.reason === 'Lending not found' ? 404 : 
-                        result.reason === 'Not authorized' ? 403 : 400;
+      const statusCode = result.reason === 'Lending not found' ? 404 :
+        result.reason === 'Not authorized' ? 403 : 400;
       return res.status(statusCode).json({ error: 'response-failed', message: result.reason });
     }
 
-    const item = items.getItem(result.lending.itemId);
-    const lender = users.getUser(req.username);
-    
+    const item = await items.getItem(result.lending.itemId);
+    const lender = await users.getUser(req.username);
+
     if (approved) {
-      activities.notifyExtensionApproved(
+      await activities.notifyExtensionApproved(
         result.lending.borrowerUsername,
         lender.displayName,
         item.name,
         lendingId
       );
     } else {
-      activities.notifyExtensionDenied(
+      await activities.notifyExtensionDenied(
         result.lending.borrowerUsername,
         lender.displayName,
         item.name,
@@ -433,20 +438,20 @@ function createLendingRoutes(models) {
     res.json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/return/initiate', requireAuth, (req, res) => {
+  router.post('/:lendingId/return/initiate', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
 
-    const result = lendings.initiateReturn(lendingId, req.username);
+    const result = await lendings.initiateReturn(lendingId, req.username);
 
     if (!result.success) {
-      const statusCode = result.reason === 'Lending not found' ? 404 : 
-                        result.reason === 'Not authorized' ? 403 : 400;
+      const statusCode = result.reason === 'Lending not found' ? 404 :
+        result.reason === 'Not authorized' ? 403 : 400;
       return res.status(statusCode).json({ error: 'return-failed', message: result.reason });
     }
 
-    const item = items.getItem(result.lending.itemId);
-    const borrower = users.getUser(req.username);
-    activities.notifyReturnInitiated(
+    const item = await items.getItem(result.lending.itemId);
+    const borrower = await users.getUser(req.username);
+    await activities.notifyReturnInitiated(
       result.lending.lenderUsername,
       borrower.displayName,
       item.name,
@@ -456,39 +461,39 @@ function createLendingRoutes(models) {
     res.json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/return/confirm', requireAuth, (req, res) => {
+  router.post('/:lendingId/return/confirm', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
     const { condition, notes } = req.body;
 
-    const lending = lendings.getLending(lendingId);
+    const lending = await lendings.getLending(lendingId);
     if (!lending) {
       return res.status(404).json({ error: 'not-found', message: 'Lending not found' });
     }
 
     if (condition && condition !== lending.conditionAtLending && !notes) {
-      return res.status(400).json({ 
-        error: 'required-explanation', 
-        message: 'Please explain the condition change' 
+      return res.status(400).json({
+        error: 'required-explanation',
+        message: 'Please explain the condition change'
       });
     }
 
-    const result = lendings.confirmReturn(lendingId, req.username, { condition, notes });
+    const result = await lendings.confirmReturn(lendingId, req.username, { condition, notes });
 
     if (!result.success) {
-      const statusCode = result.reason === 'Lending not found' ? 404 : 
-                        result.reason === 'Not authorized' ? 403 : 400;
+      const statusCode = result.reason === 'Lending not found' ? 404 :
+        result.reason === 'Not authorized' ? 403 : 400;
       return res.status(statusCode).json({ error: 'confirm-failed', message: result.reason });
     }
 
-    items.setItemAvailable(result.lending.itemId);
-    
+    await items.setItemAvailable(result.lending.itemId);
+
     const isOnTime = result.lending.actualReturnDate <= result.lending.terms.expectedReturnDate;
     if (result.lending.borrowerUsername) {
-      users.recordReturn(result.lending.borrowerUsername, isOnTime);
+      await users.recordReturn(result.lending.borrowerUsername, isOnTime);
     }
 
-    const item = items.getItem(result.lending.itemId);
-    items.addToLendingHistory(result.lending.itemId, {
+    const item = await items.getItem(result.lending.itemId);
+    await items.addToLendingHistory(result.lending.itemId, {
       lendingId,
       borrower: result.lending.borrowerInfo.name,
       dateLent: result.lending.terms.dateLent,
@@ -498,8 +503,8 @@ function createLendingRoutes(models) {
     });
 
     if (result.lending.borrowerUsername) {
-      const lender = users.getUser(req.username);
-      activities.notifyItemReturned(
+      const lender = await users.getUser(req.username);
+      await activities.notifyItemReturned(
         result.lending.borrowerUsername,
         lender.displayName,
         item.name,
@@ -510,7 +515,7 @@ function createLendingRoutes(models) {
     res.json({ lending: result.lending });
   });
 
-  router.post('/:lendingId/rate', requireAuth, (req, res) => {
+  router.post('/:lendingId/rate', requireAuth, async (req, res) => {
     const { lendingId } = req.params;
     const { rating, isLenderRating } = req.body;
 
@@ -518,19 +523,19 @@ function createLendingRoutes(models) {
       return res.status(400).json({ error: 'invalid-rating', message: 'Rating must be between 1 and 5' });
     }
 
-    const result = lendings.addRating(lendingId, req.username, rating, isLenderRating);
+    const result = await lendings.addRating(lendingId, req.username, rating, isLenderRating);
 
     if (!result.success) {
-      const statusCode = result.reason === 'Lending not found' ? 404 : 
-                        result.reason === 'Not authorized' ? 403 : 400;
+      const statusCode = result.reason === 'Lending not found' ? 404 :
+        result.reason === 'Not authorized' ? 403 : 400;
       return res.status(statusCode).json({ error: 'rating-failed', message: result.reason });
     }
 
-    const rater = users.getUser(req.username);
-    
+    const rater = await users.getUser(req.username);
+
     if (isLenderRating) {
-      users.addRating(result.lending.lenderUsername, rating);
-      activities.notifyRatingReceived(
+      await users.addRating(result.lending.lenderUsername, rating);
+      await activities.notifyRatingReceived(
         result.lending.lenderUsername,
         rater.displayName,
         rating,
@@ -538,8 +543,8 @@ function createLendingRoutes(models) {
       );
     } else {
       if (result.lending.borrowerUsername) {
-        users.addRating(result.lending.borrowerUsername, rating);
-        activities.notifyRatingReceived(
+        await users.addRating(result.lending.borrowerUsername, rating);
+        await activities.notifyRatingReceived(
           result.lending.borrowerUsername,
           rater.displayName,
           rating,

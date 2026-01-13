@@ -6,15 +6,21 @@ function createAuthRoutes(models) {
   const router = express.Router();
   const { sessions, users, activities } = models;
 
-  router.get('/session', (req, res) => {
+  router.get('/session', async (req, res) => {
     const sid = req.cookies.sid;
-    if (!sid || !sessions.isValidSession(sid)) {
+    if (!sid) {
       return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
     }
 
-    const username = sessions.getUsername(sid);
-    const user = users.getUser(username);
-    const unreadCount = activities.getUnreadCount(username);
+    // Check session validity async
+    const isValid = await sessions.isValidSession(sid);
+    if (!isValid) {
+      return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
+    }
+
+    const username = await sessions.getUsername(sid);
+    const user = await users.getUser(username);
+    const unreadCount = await activities.getUnreadCount(username);
 
     if (!user) {
       res.clearCookie('sid');
@@ -33,7 +39,7 @@ function createAuthRoutes(models) {
     });
   });
 
-  router.post('/register', (req, res) => {
+  router.post('/register', async (req, res) => {
     const { username, displayName, email, phone } = req.body;
 
     if (!username) {
@@ -49,7 +55,7 @@ function createAuthRoutes(models) {
       return res.status(403).json({ error: 'auth-insufficient', message: 'This username is not allowed' });
     }
 
-    if (users.userExists(username)) {
+    if (await users.userExists(username)) {
       return res.status(409).json({ error: 'username-exists', message: 'Username already taken' });
     }
 
@@ -57,12 +63,12 @@ function createAuthRoutes(models) {
       return res.status(400).json({ error: 'invalid-email', message: 'Invalid email format' });
     }
 
-    const result = users.createUser(username, displayName, email, phone);
+    const result = await users.createUser(username, displayName, email, phone);
     if (!result.success) {
       return res.status(400).json({ error: 'registration-failed', message: result.reason });
     }
 
-    const sid = sessions.createSession(username.toLowerCase());
+    const sid = await sessions.createSession(username.toLowerCase());
     res.cookie('sid', sid, { httpOnly: true, sameSite: 'strict' });
 
     res.json({
@@ -77,7 +83,7 @@ function createAuthRoutes(models) {
     });
   });
 
-  router.post('/login', (req, res) => {
+  router.post('/login', async (req, res) => {
     const { username } = req.body;
 
     if (!username) {
@@ -93,13 +99,14 @@ function createAuthRoutes(models) {
       return res.status(403).json({ error: 'auth-insufficient', message: 'This user does not have permission to access the platform' });
     }
 
-    if (!users.userExists(username)) {
+    const exists = await users.userExists(username);
+    if (!exists) {
       return res.status(401).json({ error: 'user-not-found', message: 'User not registered. Please register first.' });
     }
 
-    const user = users.getUser(username);
-    const sid = sessions.createSession(username.toLowerCase());
-    const unreadCount = activities.getUnreadCount(username);
+    const user = await users.getUser(username);
+    const sid = await sessions.createSession(username.toLowerCase());
+    const unreadCount = await activities.getUnreadCount(username);
 
     res.cookie('sid', sid, { httpOnly: true, sameSite: 'strict' });
 
@@ -115,10 +122,10 @@ function createAuthRoutes(models) {
     });
   });
 
-  router.post('/logout', (req, res) => {
+  router.post('/logout', async (req, res) => {
     const sid = req.cookies.sid;
     if (sid) {
-      sessions.deleteSession(sid);
+      await sessions.deleteSession(sid);
     }
     res.clearCookie('sid');
     res.json({ message: 'Logged out successfully' });
@@ -128,4 +135,3 @@ function createAuthRoutes(models) {
 }
 
 export default createAuthRoutes;
-

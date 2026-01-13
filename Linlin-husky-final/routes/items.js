@@ -6,24 +6,29 @@ function createItemRoutes(models) {
   const router = express.Router();
   const { sessions, users, items, lendings, activities } = models;
 
-  function requireAuth(req, res, next) {
+  // Middleware to check authentication
+  const requireAuth = async (req, res, next) => {
     const sid = req.cookies.sid;
-    if (!sid || !sessions.isValidSession(sid)) {
+    if (!sid) {
       return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
     }
-    req.username = sessions.getUsername(sid);
+    const isValid = await sessions.isValidSession(sid);
+    if (!isValid) {
+      return res.status(401).json({ error: 'auth-missing', message: 'Not logged in' });
+    }
+    req.username = await sessions.getUsername(sid);
     next();
-  }
+  };
 
   router.get('/categories', (req, res) => {
-    res.json({ categories: items.getCategories() });
+    res.json({ categories: items.getCategories() }); // Sync
   });
 
   router.get('/conditions', (req, res) => {
-    res.json({ conditions: items.getConditions() });
+    res.json({ conditions: items.getConditions() }); // Sync
   });
 
-  router.get('/public', requireAuth, (req, res) => {
+  router.get('/public', requireAuth, async (req, res) => {
     const filters = {
       category: req.query.category,
       condition: req.query.condition,
@@ -33,53 +38,54 @@ function createItemRoutes(models) {
       sortBy: req.query.sortBy
     };
 
-    const publicItems = items.getPublicItems(filters);
-    
-    const filteredItems = publicItems.filter(item => 
+    const publicItems = await items.getPublicItems(filters);
+
+    const filteredItems = publicItems.filter(item =>
       item.ownerUsername.toLowerCase() !== req.username.toLowerCase()
     );
-    
-    const enrichedItems = filteredItems.map(item => ({
+
+    // Enrich items with owner profile (Async loop)
+    const enrichedItems = await Promise.all(filteredItems.map(async item => ({
       ...item,
-      owner: users.getPublicProfile(item.ownerUsername)
-    }));
+      owner: await users.getPublicProfile(item.ownerUsername)
+    })));
 
     res.json({ items: enrichedItems });
   });
 
-  router.get('/', requireAuth, (req, res) => {
-    const userItems = items.getUserItems(req.username);
+  router.get('/', requireAuth, async (req, res) => {
+    const userItems = await items.getUserItems(req.username);
     res.json({ items: userItems });
   });
 
-  router.get('/available', requireAuth, (req, res) => {
-    const availableItems = items.getAvailableItems(req.username);
+  router.get('/available', requireAuth, async (req, res) => {
+    const availableItems = await items.getAvailableItems(req.username);
     res.json({ items: availableItems });
   });
 
-  router.get('/lent', requireAuth, (req, res) => {
-    const lentItems = items.getLentItems(req.username);
+  router.get('/lent', requireAuth, async (req, res) => {
+    const lentItems = await items.getLentItems(req.username);
     res.json({ items: lentItems });
   });
 
-  router.get('/search', requireAuth, (req, res) => {
+  router.get('/search', requireAuth, async (req, res) => {
     const query = req.query.q || '';
     const ownerOnly = req.query.ownerOnly === 'true';
-    
-    const searchResults = items.searchItems(query, ownerOnly ? req.username : null);
-    
-    const enrichedResults = searchResults.map(item => ({
+
+    const searchResults = await items.searchItems(query, ownerOnly ? req.username : null);
+
+    const enrichedResults = await Promise.all(searchResults.map(async item => ({
       ...item,
-      owner: users.getPublicProfile(item.ownerUsername),
+      owner: await users.getPublicProfile(item.ownerUsername),
       canBorrow: item.ownerUsername.toLowerCase() !== req.username.toLowerCase() && item.status === 'available'
-    }));
+    })));
 
     res.json({ items: enrichedResults });
   });
 
-  router.get('/:itemId', requireAuth, (req, res) => {
+  router.get('/:itemId', requireAuth, async (req, res) => {
     const { itemId } = req.params;
-    const item = items.getItem(itemId);
+    const item = await items.getItem(itemId);
 
     if (!item) {
       return res.status(404).json({ error: 'not-found', message: 'Item not found' });
@@ -92,7 +98,7 @@ function createItemRoutes(models) {
 
     const enrichedItem = {
       ...item,
-      owner: users.getPublicProfile(item.ownerUsername),
+      owner: await users.getPublicProfile(item.ownerUsername),
       canEdit: item.ownerUsername.toLowerCase() === req.username.toLowerCase(),
       canBorrow: item.ownerUsername.toLowerCase() !== req.username.toLowerCase() && item.status === 'available'
     };
@@ -100,7 +106,7 @@ function createItemRoutes(models) {
     res.json({ item: enrichedItem });
   });
 
-  router.post('/', requireAuth, (req, res) => {
+  router.post('/', requireAuth, async (req, res) => {
     const itemData = req.body;
 
     if (!itemData.name || itemData.name.trim().length < 2) {
@@ -119,7 +125,7 @@ function createItemRoutes(models) {
       return res.status(400).json({ error: 'required-value', message: 'Estimated value is required for public items' });
     }
 
-    const result = items.createItem(req.username, itemData);
+    const result = await items.createItem(req.username, itemData);
 
     if (!result.success) {
       return res.status(400).json({ error: 'creation-failed', message: result.reason });
@@ -128,40 +134,40 @@ function createItemRoutes(models) {
     res.status(201).json({ item: result.item });
   });
 
-  router.put('/:itemId', requireAuth, (req, res) => {
+  router.put('/:itemId', requireAuth, async (req, res) => {
     const { itemId } = req.params;
     const updates = req.body;
 
-    const result = items.updateItem(itemId, req.username, updates);
+    const result = await items.updateItem(itemId, req.username, updates);
 
     if (!result.success) {
-      const statusCode = result.reason === 'Item not found' ? 404 : 
-                        result.reason === 'Not authorized to update this item' ? 403 : 400;
+      const statusCode = result.reason === 'Item not found' ? 404 :
+        result.reason === 'Not authorized to update this item' ? 403 : 400;
       return res.status(statusCode).json({ error: 'update-failed', message: result.reason });
     }
 
     res.json({ item: result.item });
   });
 
-  router.delete('/:itemId', requireAuth, (req, res) => {
+  router.delete('/:itemId', requireAuth, async (req, res) => {
     const { itemId } = req.params;
 
-    const result = items.deleteItem(itemId, req.username);
+    const result = await items.deleteItem(itemId, req.username);
 
     if (!result.success) {
-      const statusCode = result.reason === 'Item not found' ? 404 : 
-                        result.reason === 'Not authorized to delete this item' ? 403 : 400;
+      const statusCode = result.reason === 'Item not found' ? 404 :
+        result.reason === 'Not authorized to delete this item' ? 403 : 400;
       return res.status(statusCode).json({ error: 'delete-failed', message: result.reason });
     }
 
     res.json({ message: 'Item deleted successfully' });
   });
 
-  router.post('/:itemId/borrow-request', requireAuth, (req, res) => {
+  router.post('/:itemId/borrow-request', requireAuth, async (req, res) => {
     const { itemId } = req.params;
     const { message, proposedReturnDate } = req.body;
 
-    const item = items.getItem(itemId);
+    const item = await items.getItem(itemId);
     if (!item) {
       return res.status(404).json({ error: 'not-found', message: 'Item not found' });
     }
@@ -191,17 +197,17 @@ function createItemRoutes(models) {
       requireDeposit: false,
       depositAmount: 0,
       allowExtensions: true,
-      isBorrowRequest: true  
+      isBorrowRequest: true
     };
 
-    const result = lendings.createLending(item.ownerUsername, borrower, itemId, terms);
+    const result = await lendings.createLending(item.ownerUsername, borrower, itemId, terms);
 
     if (!result.success) {
       return res.status(400).json({ error: 'request-failed', message: result.reason });
     }
 
-    const requester = users.getUser(req.username);
-    activities.addActivity(
+    const requester = await users.getUser(req.username);
+    await activities.addActivity(
       item.ownerUsername.toLowerCase(),
       'borrow_request',
       requester.displayName + ' wants to borrow "' + item.name + '"',
