@@ -1,0 +1,132 @@
+.pending-requests-page {
+  max-width: 55rem;
+  margin: 0 auto;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.request-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.request-card .item-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.request-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.requester-info,
+.lender-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.requester-info .label,
+.lender-info .label {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.requester-info .requester-name,
+.lender-info .lender-name {
+  font-weight: 500;
+}
+
+.request-type-info {
+  margin-top: 0.5rem;
+}
+
+.request-type-badge {
+  display: inline-block;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+}
+
+.trust-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+}
+
+.terms-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9375rem;
+}
+
+.term .label {
+  color: var(--color-text-muted);
+  margin-right: 0.25rem;
+}
+
+.expectations {
+  background: var(--color-bg);
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+}
+
+.expectations .label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.expectations p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.negotiation-info {
+  font-size: 0.875rem;
+  color: var(--color-warning);
+}
+
+.request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 0.0625rem solid var(--color-border);
+}
+
+.request-actions .view-button {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text);
+  margin-top: 0;
+}
+
+.request-actions .accept-button,
+.request-actions .decline-button {
+  padding: 0.625rem 1.25rem;
+}
+
