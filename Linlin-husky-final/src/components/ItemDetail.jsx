@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ACTIONS } from '../reducers/appReducer.js';
+// import { ACTIONS } from '../reducers/appReducer.js';
 import * as api from '../services/api.js';
 import { formatCurrency, formatDate, capitalizeFirst, getConditionColor, getStatusColor } from '../utils/helpers.js';
 import starFilledIcon from '../assets/icons/star-filled.svg';
@@ -22,7 +22,7 @@ function ItemDetail({ state, dispatch, navigateTo, item }) {
       .then(data => {
         setItemData(data.item);
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   function loadHistory() {
@@ -30,7 +30,7 @@ function ItemDetail({ state, dispatch, navigateTo, item }) {
       .then(data => {
         setHistory(data.history);
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   if (!itemData) {
@@ -106,13 +106,13 @@ function ItemDetail({ state, dispatch, navigateTo, item }) {
 
         {itemData.status === 'available' && (
           <div className="detail-actions">
-            <button 
+            <button
               className="action-button primary"
               onClick={() => navigateTo('lending-form', { item: itemData })}
             >
               Lend This Item
             </button>
-            <button 
+            <button
               className="action-button secondary"
               onClick={() => navigateTo('item-form', { item: itemData })}
             >
@@ -127,8 +127,8 @@ function ItemDetail({ state, dispatch, navigateTo, item }) {
           <h2 className="section-title">Lending History</h2>
           <div className="history-list">
             {history.map(record => (
-              <article 
-                key={record.id} 
+              <article
+                key={record.id}
                 className="history-card"
                 onClick={() => navigateTo('lending-detail', { lending: record })}
               >
@@ -151,11 +151,11 @@ function ItemDetail({ state, dispatch, navigateTo, item }) {
                     <span className="rating-label">Rating given:</span>
                     <span className="rating-stars">
                       {[1, 2, 3, 4, 5].map(star => (
-                        <img 
-                          key={star} 
-                          src={star <= record.borrowerRating ? starFilledIcon : starOutlineIcon} 
-                          alt="" 
-                          className={'star-icon' + (star <= record.borrowerRating ? ' filled' : '')} 
+                        <img
+                          key={star}
+                          src={star <= record.borrowerRating ? starFilledIcon : starOutlineIcon}
+                          alt=""
+                          className={'star-icon' + (star <= record.borrowerRating ? ' filled' : '')}
                         />
                       ))}
                     </span>

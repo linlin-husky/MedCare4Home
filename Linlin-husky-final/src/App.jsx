@@ -1,6 +1,6 @@
 import { useReducer, useEffect } from 'react';
 import { ACTIONS, initialState, appReducer } from '../reducers/appReducer.js';
-import * as api from '../services/api.js';
+import * as api from './services/api.js';
 import Header from './components/Header.jsx';
 import LoginForm from './components/LoginForm.jsx';
 import RegisterForm from './components/RegisterForm.jsx';

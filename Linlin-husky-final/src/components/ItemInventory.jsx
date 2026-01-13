@@ -37,7 +37,7 @@ function ItemInventory({ state, dispatch, navigateTo }) {
       .then(data => {
         setCategories(data.categories);
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   function handleDeleteClick(item) {
@@ -50,7 +50,7 @@ function ItemInventory({ state, dispatch, navigateTo }) {
   function handleConfirmDelete() {
     const item = confirmDialog.item;
     setConfirmDialog({ isOpen: false, item: null });
-    
+
     dispatch({ type: ACTIONS.SET_LOADING, payload: true });
     api.deleteItem(item.id)
       .then(() => {
@@ -69,25 +69,25 @@ function ItemInventory({ state, dispatch, navigateTo }) {
 
   function getFilteredItems() {
     let filtered = state.items;
-    
+
     if (filter === 'available') {
       filtered = filtered.filter(item => item.status === 'available');
     } else if (filter === 'lent') {
       filtered = filtered.filter(item => item.status === 'lent');
     }
-    
+
     if (categoryFilter) {
       filtered = filtered.filter(item => item.category === categoryFilter);
     }
-    
+
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(term) ||
         item.description.toLowerCase().includes(term)
       );
     }
-    
+
     return filtered;
   }
 
@@ -103,7 +103,7 @@ function ItemInventory({ state, dispatch, navigateTo }) {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
-      
+
       <div className="page-header">
         <div className="header-content">
           <h1 className="page-title">My Items</h1>
@@ -111,7 +111,7 @@ function ItemInventory({ state, dispatch, navigateTo }) {
             {filteredItems.length} items • Total value: {formatCurrency(totalValue)}
           </p>
         </div>
-        <button 
+        <button
           className="add-button"
           onClick={() => navigateTo('item-form')}
         >
@@ -133,7 +133,7 @@ function ItemInventory({ state, dispatch, navigateTo }) {
             <option value="lent">Lent Out</option>
           </select>
         </div>
-        
+
         <div className="filter-group">
           <label htmlFor="category-filter" className="filter-label">Category:</label>
           <select
@@ -148,7 +148,7 @@ function ItemInventory({ state, dispatch, navigateTo }) {
             ))}
           </select>
         </div>
-        
+
         <div className="search-group">
           <label htmlFor="item-search" className="visually-hidden">Search items</label>
           <input
@@ -165,13 +165,13 @@ function ItemInventory({ state, dispatch, navigateTo }) {
       {filteredItems.length === 0 ? (
         <div className="empty-state">
           <p className="empty-message">
-            {state.items.length === 0 
+            {state.items.length === 0
               ? "You haven't added any items yet. Start by adding your first item!"
               : "No items match your filters."
             }
           </p>
           {state.items.length === 0 && (
-            <button 
+            <button
               className="add-button"
               onClick={() => navigateTo('item-form')}
             >
@@ -189,25 +189,25 @@ function ItemInventory({ state, dispatch, navigateTo }) {
                   {capitalizeFirst(item.status)}
                 </span>
               </div>
-              
+
               <div className="item-details">
                 <span className="item-category">{capitalizeFirst(item.category)}</span>
                 <span className={'item-condition ' + getConditionColor(item.condition)}>
                   {capitalizeFirst(item.condition)}
                 </span>
               </div>
-              
+
               {item.description && (
                 <p className="item-description">{item.description}</p>
               )}
-              
+
               <div className="item-meta">
                 <span className="item-value">{formatCurrency(item.estimatedValue)}</span>
                 {item.isPublic && <span className="public-badge">Public</span>}
               </div>
-              
+
               <div className="item-actions">
-                <button 
+                <button
                   className="action-button view"
                   onClick={() => navigateTo('item-detail', { item })}
                 >
@@ -215,19 +215,19 @@ function ItemInventory({ state, dispatch, navigateTo }) {
                 </button>
                 {item.status === 'available' && (
                   <>
-                    <button 
+                    <button
                       className="action-button edit"
                       onClick={() => navigateTo('item-form', { item })}
                     >
                       Edit
                     </button>
-                    <button 
+                    <button
                       className="action-button lend"
                       onClick={() => navigateTo('lending-form', { item })}
                     >
                       Lend
                     </button>
-                    <button 
+                    <button
                       className="action-button delete"
                       onClick={() => handleDeleteClick(item)}
                     >
