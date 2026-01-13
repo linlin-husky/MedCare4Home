@@ -113,4 +113,4 @@ Users earn trust scores calculated from:
 
 ## Project Info
 
-**INFO6250 Project** - Created by Nishal Save ( NUID: 002039310 )
+

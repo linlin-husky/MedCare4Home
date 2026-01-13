@@ -12,12 +12,12 @@ function LoginForm({ onLogin, onSwitchToRegister }) {
   function handleSubmit(e) {
     e.preventDefault();
     const validationErrors = validateUsername(username);
-    
+
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
     }
-    
+
     setErrors([]);
     onLogin(username);
   }
@@ -33,13 +33,13 @@ function LoginForm({ onLogin, onSwitchToRegister }) {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1 className="auth-title">LendTrust</h1>
+          <h1 className="auth-title">Home Medical Care</h1>
           <p className="auth-subtitle">Your Social Lending Community</p>
         </div>
-        
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <h2 className="form-title">Welcome Back</h2>
-          
+
           <div className="form-group">
             <label htmlFor="login-username" className="form-label">Username</label>
             <input
@@ -59,15 +59,15 @@ function LoginForm({ onLogin, onSwitchToRegister }) {
               </ul>
             )}
           </div>
-          
+
           <button type="submit" className="auth-button">
             Sign In
           </button>
-          
+
           <p className="auth-switch">
-            New to LendTrust?{' '}
-            <button 
-              type="button" 
+            New to Home Medical Care?{' '}
+            <button
+              type="button"
               className="link-button"
               onClick={onSwitchToRegister}
             >
@@ -75,9 +75,9 @@ function LoginForm({ onLogin, onSwitchToRegister }) {
             </button>
           </p>
         </form>
-        
+
         <div className="auth-features">
-          <h3 className="features-title">Why LendTrust?</h3>
+          <h3 className="features-title">Why Home Medical Care?</h3>
           <ul className="features-list">
             <li className="feature-item">
               <span className="feature-icon"><img src={libraryBooksIcon} alt="" className="feature-svg" /></span>

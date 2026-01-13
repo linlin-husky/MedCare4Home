@@ -13,44 +13,44 @@ function RegisterForm({ onRegister, onSwitchToLogin }) {
 
   function validateForm() {
     const newErrors = {};
-    
+
     const usernameErrors = validateUsername(formData.username);
     if (usernameErrors.length > 0) {
       newErrors.username = usernameErrors;
     }
-    
+
     if (formData.email) {
       const emailErrors = validateEmail(formData.email);
       if (emailErrors.length > 0) {
         newErrors.email = emailErrors;
       }
     }
-    
+
     if (formData.phone) {
       const phoneErrors = validatePhone(formData.phone);
       if (phoneErrors.length > 0) {
         newErrors.phone = phoneErrors;
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     onRegister(formData);
   }
 
   function handleInputChange(e) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -64,13 +64,13 @@ function RegisterForm({ onRegister, onSwitchToLogin }) {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1 className="auth-title">LendTrust</h1>
+          <h1 className="auth-title">Home Medical Care</h1>
           <p className="auth-subtitle">Join the Lending Community</p>
         </div>
-        
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <h2 className="form-title">Create Account</h2>
-          
+
           <div className="form-group">
             <label htmlFor="register-username" className="form-label">
               Username <span className="required">*</span>
@@ -93,7 +93,7 @@ function RegisterForm({ onRegister, onSwitchToLogin }) {
               </ul>
             )}
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="register-displayName" className="form-label">
               Display Name
@@ -109,7 +109,7 @@ function RegisterForm({ onRegister, onSwitchToLogin }) {
               autoComplete="name"
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="register-email" className="form-label">
               Email
@@ -132,7 +132,7 @@ function RegisterForm({ onRegister, onSwitchToLogin }) {
               </ul>
             )}
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="register-phone" className="form-label">
               Phone
@@ -155,15 +155,15 @@ function RegisterForm({ onRegister, onSwitchToLogin }) {
               </ul>
             )}
           </div>
-          
+
           <button type="submit" className="auth-button">
             Create Account
           </button>
-          
+
           <p className="auth-switch">
             Already have an account?{' '}
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="link-button"
               onClick={onSwitchToLogin}
             >

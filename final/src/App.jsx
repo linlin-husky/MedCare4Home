@@ -39,7 +39,7 @@ function App() {
           .then(data => {
             dispatch({ type: ACTIONS.SET_UNREAD_COUNT, payload: data.count });
           })
-          .catch(() => {});
+          .catch(() => { });
       }, 30000);
     }
     return () => {
@@ -114,12 +114,12 @@ function App() {
     switch (state.currentPage) {
       case 'login':
         return (
-          <LoginForm 
+          <LoginForm
             onLogin={handleLogin}
             onSwitchToRegister={() => navigateTo('register')}
           />
         );
-      
+
       case 'register':
         return (
           <RegisterForm
@@ -127,7 +127,7 @@ function App() {
             onSwitchToLogin={() => navigateTo('login')}
           />
         );
-      
+
       case 'dashboard':
         return (
           <Dashboard
@@ -136,7 +136,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'inventory':
         return (
           <ItemInventory
@@ -145,7 +145,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'item-form':
         return (
           <ItemForm
@@ -155,7 +155,7 @@ function App() {
             item={state.selectedItem}
           />
         );
-      
+
       case 'item-detail':
         return (
           <ItemDetail
@@ -165,7 +165,7 @@ function App() {
             item={state.selectedItem}
           />
         );
-      
+
       case 'lendings':
         return (
           <LendingList
@@ -174,7 +174,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'lending-form':
         return (
           <LendingForm
@@ -184,7 +184,7 @@ function App() {
             item={state.selectedItem}
           />
         );
-      
+
       case 'lending-detail':
         return (
           <LendingDetail
@@ -194,7 +194,7 @@ function App() {
             lending={state.selectedLending}
           />
         );
-      
+
       case 'borrowings':
         return (
           <BorrowingList
@@ -203,7 +203,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'pending-requests':
         return (
           <PendingRequests
@@ -212,7 +212,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'public-library':
         return (
           <PublicLibrary
@@ -221,7 +221,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'borrow-request':
         return (
           <BorrowRequest
@@ -231,7 +231,7 @@ function App() {
             item={state.selectedItem}
           />
         );
-      
+
       case 'activity':
         return (
           <ActivityFeed
@@ -240,7 +240,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'profile':
         return (
           <ProfileEdit
@@ -249,7 +249,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'user-profile':
         return (
           <UserProfile
@@ -258,7 +258,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       case 'admin':
         return (
           <AdminPanel
@@ -267,7 +267,7 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      
+
       default:
         return (
           <Dashboard
@@ -290,23 +290,23 @@ function App() {
           navigateTo={navigateTo}
         />
       )}
-      
+
       <main className="main-content">
         {state.isLoading && <LoadingSpinner />}
-        
+
         {state.error && (
           <ErrorMessage message={state.error} onClose={clearMessages} />
         )}
-        
+
         {state.success && (
           <SuccessMessage message={state.success} onClose={clearMessages} />
         )}
-        
+
         {renderPage()}
       </main>
-      
+
       <footer className="app-footer">
-        <p>INFO6250 Project - Created by Nishal</p>
+
       </footer>
     </div>
   );
