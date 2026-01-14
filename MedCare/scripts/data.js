@@ -18,7 +18,7 @@ async function importData() {
 
         // Get or create test user
         let testUsername = 'linlin_husky';
-        
+
         console.log('📝 Seeding data for user:', testUsername);
 
         // Create Appointments
@@ -395,8 +395,8 @@ async function importData() {
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(med)
-                }).catch(() => {});
-            } catch (e) {}
+                }).catch(() => { });
+            } catch (e) { }
         }
         console.log(`✅ Processed ${medications.length} medications`);
 
@@ -408,8 +408,8 @@ async function importData() {
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(vital)
-                }).catch(() => {});
-            } catch (e) {}
+                }).catch(() => { });
+            } catch (e) { }
         }
         console.log(`✅ Processed ${vitals.length} vitals`);
 
@@ -421,8 +421,8 @@ async function importData() {
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(symptom)
-                }).catch(() => {});
-            } catch (e) {}
+                }).catch(() => { });
+            } catch (e) { }
         }
         console.log(`✅ Processed ${symptoms.length} symptoms`);
 
@@ -434,8 +434,8 @@ async function importData() {
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(test)
-                }).catch(() => {});
-            } catch (e) {}
+                }).catch(() => { });
+            } catch (e) { }
         }
         console.log(`✅ Processed ${medicalTests.length} medical tests`);
 
@@ -446,7 +446,7 @@ async function importData() {
         console.log(`  - ${vitals.length} vitals`);
         console.log(`  - ${symptoms.length} symptoms`);
         console.log(`  - ${medicalTests.length} medical tests`);
-        
+
         process.exit(0);
     } catch (err) {
         console.error('❌ Error seeding data:', err);
