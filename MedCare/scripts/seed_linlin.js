@@ -4,6 +4,7 @@ import users from '../models/users.js';
 import appointments from '../models/appointments.js';
 import medications from '../models/medications.js';
 import vitals from '../models/vitals.js';
+import medicalTests from '../models/medicalTests.js';
 
 const MONGODB_URI = 'mongodb://localhost:27017/medcare4home';
 const TARGET_USER = 'linlin_husky';
@@ -132,6 +133,65 @@ async function seed() {
             });
         }
         console.log('Vitals added.');
+
+        // 5. Add Medical Tests
+        console.log('Adding medical tests...');
+        const testData = [
+            {
+                testName: 'Cholesterol Screening',
+                category: 'Blood Work',
+                status: 'scheduled',
+                testDate: new Date(new Date().setDate(new Date().getDate() + 14)), // 2 weeks later
+                doctor: 'Dr. Heart',
+                facility: 'City Lab',
+                notes: 'Fasting required for 12 hours.'
+            },
+            {
+                testName: 'Blood Pressure Monitoring',
+                category: 'Cardiac',
+                status: 'completed',
+                testDate: new Date(new Date().setDate(new Date().getDate() - 2)), // 2 days ago
+                result: '120/80 mmHg',
+                doctor: 'Dr. Heart',
+                notes: 'Normal range.'
+            },
+            {
+                testName: 'Vital Signs Check',
+                category: 'General',
+                status: 'completed',
+                testDate: new Date(new Date().setDate(new Date().getDate() - 5)), // 5 days ago
+                result: 'Pulse: 72 bpm, Temp: 98.6°F',
+                doctor: 'Nurse Joy',
+                facility: 'Walk-in Clinic'
+            },
+            {
+                testName: 'Annual Physical',
+                category: 'General',
+                status: 'completed',
+                testDate: new Date(new Date().setMonth(new Date().getMonth() - 1)), // 1 month ago
+                result: 'Normal',
+                doctor: 'Dr. Smith'
+            }
+        ];
+
+        await mongoose.connection.collection('medicaltests').deleteMany({ username: TARGET_USER.toLowerCase() });
+
+        for (const test of testData) {
+            await medicalTests.addTest(TARGET_USER, test);
+        }
+        console.log('Medical tests added.');
+
+        // 6. Add More Vitals (BP, Pulse, Temp)
+        const moreVitals = [
+            { type: 'bloodPressure', value: 120, unit: 'mmHg', date: new Date(), notes: 'Systolic' },
+            { type: 'pulse', value: 72, unit: 'bpm', date: new Date() },
+            { type: 'temperature', value: 98.6, unit: '°F', date: new Date() }
+        ];
+
+        for (const v of moreVitals) {
+            await vitals.addVital(TARGET_USER, v);
+        }
+        console.log('Additional vitals added.');
 
         console.log('Seeding completed successfully.');
         process.exit(0);

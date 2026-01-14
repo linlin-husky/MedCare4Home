@@ -1,5 +1,5 @@
 :root {
-  --primary: #1abc9c;
+  --primary: #3b82f6;
   --secondary: #34495e;
   --bg-light: #f5f6fa;
   --text-dark: #2c3e50;
@@ -62,12 +62,12 @@ body {
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: bold;
-  background: #e57373;
+  background: #94a3b8;
   color: #fff;
 }
 
 .logout-btn:hover {
-  background-color: #e74c3c;
+  background-color: #64748b;
 }
 
 .card {

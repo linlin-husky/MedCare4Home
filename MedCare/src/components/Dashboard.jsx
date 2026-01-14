@@ -6,6 +6,7 @@ function Dashboard({ user, navigateTo }) {
   const [appointments, setAppointments] = useState([]);
   const [medications, setMedications] = useState([]);
   const [weightData, setWeightData] = useState([]);
+  const [medicalTests, setMedicalTests] = useState([]);
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -59,6 +60,13 @@ function Dashboard({ user, navigateTo }) {
           const weights = vList.map(v => v.value);
           if (weights.length > 0) setWeightData(weights);
         }
+
+        const tests = await api.getMedicalTests();
+        const tList = tests && (tests.tests || tests);
+        if (Array.isArray(tList)) {
+          setMedicalTests(tList);
+        }
+
       } catch (err) {
         console.error('Failed to fetch dashboard data', err);
       }
@@ -93,6 +101,9 @@ function Dashboard({ user, navigateTo }) {
       })
       .catch(err => alert(err.message));
   };
+
+  // Find upcoming test
+  const upcomingTest = medicalTests.find(t => t.status === 'scheduled') || medicalTests[0];
 
   return (
     <div className="dashboard-container">
@@ -165,7 +176,12 @@ function Dashboard({ user, navigateTo }) {
         </div>
 
         {/* Medication Reminder */}
-        <div className="metric-card medication-card">
+        <div
+          className="metric-card medication-card"
+          onClick={() => navigateTo('manage-prescriptions')}
+          style={{ cursor: 'pointer' }}
+          title="Manage Prescriptions"
+        >
           <div className="card-header-clean">
             <div className="blue-accent-bar"></div>
             <h3>Medication Reminder</h3>
@@ -216,13 +232,21 @@ function Dashboard({ user, navigateTo }) {
             </div>
           </div>
 
-          <div className="test-item">
+          <div className="test-item" onClick={() => navigateTo('tests')} style={{ cursor: 'pointer' }}>
             <div className="test-status-dot"></div>
             <div className="test-info">
-              <div className="test-name">Cholesterol Testing</div>
-              <div className="test-desc">Lorem ipsum is dolorem...</div>
+              <div className="test-name">
+                {upcomingTest ? upcomingTest.testName : 'No upcoming tests'}
+              </div>
+              <div className="test-desc">
+                {upcomingTest ? (upcomingTest.notes || upcomingTest.category) : 'Check back later'}
+              </div>
             </div>
-            <div className="test-cycle">Monthly</div>
+            <div className="test-cycle">
+              {upcomingTest && upcomingTest.testDate
+                ? new Date(upcomingTest.testDate).toLocaleDateString()
+                : ''}
+            </div>
           </div>
         </div>
 

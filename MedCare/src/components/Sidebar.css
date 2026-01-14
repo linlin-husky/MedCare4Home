@@ -21,7 +21,7 @@
 .logo-icon {
   width: 30px;
   height: 30px;
-  background-color: #1abc9c;
+  background-color: #3b82f6;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -67,16 +67,17 @@
 }
 
 .menu-item.active {
-  color: #1abc9c;
-  border-left: 3px solid #1abc9c;
-  background-color: rgba(26, 188, 156, 0.1);
+  color: #3b82f6;
+  border-left: 3px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
 }
 
 .item-icon {
   margin-right: 12px;
   width: 16px;
   height: 16px;
-  border: 1px solid currentColor; /* Placeholder for real icons */
+  border: 1px solid currentColor;
+  /* Placeholder for real icons */
   border-radius: 4px;
 }
 
@@ -87,7 +88,7 @@
 
 .item-badge {
   font-size: 9px;
-  background-color: #1abc9c;
+  background-color: #3b82f6;
   color: white;
   padding: 2px 6px;
   border-radius: 10px;

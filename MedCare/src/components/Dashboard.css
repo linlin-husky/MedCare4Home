@@ -263,12 +263,13 @@
   padding-top: 20px;
   width: 100%;
   gap: 12px;
+  cursor: pointer;
 }
 
 .test-status-dot {
   width: 10px;
   height: 10px;
-  background-color: #00d2ff;
+  background-color: #3b82f6;
   border-radius: 50%;
   flex-shrink: 0;
 }
