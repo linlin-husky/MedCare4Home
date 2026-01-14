@@ -236,6 +236,18 @@ function deleteVital(id) {
   }).then(handleResponse);
 }
 
+function getAllUsers() {
+  return fetch('/api/users', {
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
+function searchUsers(query) {
+  return fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
 // ============ EXPORTS ============
 export {
   // Auth
@@ -246,6 +258,8 @@ export {
   // Profile
   getUserProfile,
   updateUserProfile,
+  getAllUsers,
+  searchUsers,
   // Appointments
   getAppointments,
   createAppointment,

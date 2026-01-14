@@ -6,8 +6,12 @@ import crypto from 'crypto';
 const vitalsSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     username: { type: String, required: true, lowercase: true },
-    type: { type: String, required: true }, // weight, pulse, cholesterol, blood_pressure
-    value: { type: Number, required: true },
+    type: { type: String, required: true }, // weight, height, bloodPressure, pulse, etc.
+    value: { type: Number }, // Primary value (e.g. weight, or systolic if simple)
+    // Extended fields for specific types
+    systolic: { type: Number },
+    diastolic: { type: Number },
+    pulse: { type: Number },
     unit: { type: String },
     date: { type: Date, default: Date.now },
     notes: { type: String }

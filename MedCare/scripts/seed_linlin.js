@@ -15,6 +15,17 @@ async function seed() {
         await mongoose.connect(MONGODB_URI);
         console.log('Connected.');
 
+        // Ensure Jorts exists for directory testing
+        const jortsExists = await users.userExists('jorts');
+        if (!jortsExists) {
+            await users.createUser('jorts', 'Jorts the Cat', 'jorts@cat.com', '555-MEOW');
+            await mongoose.connection.collection('users').updateOne(
+                { username: 'jorts' },
+                { $set: { trustScore: 99, totalLendings: 50, totalBorrowings: 2 } }
+            );
+            console.log('Created user: Jorts');
+        }
+
         // 1. Create User
         console.log(`Checking user: ${TARGET_USER}...`);
         let user = await users.getUser(TARGET_USER);
@@ -26,6 +37,22 @@ async function seed() {
                 'linlin@husky.neu.edu',
                 '617-555-0123'
             );
+
+            // Add Family Members directly to the user document
+            if (result.success) {
+                await mongoose.connection.collection('users').updateOne(
+                    { username: TARGET_USER },
+                    {
+                        $set: {
+                            familyMembers: [
+                                { name: 'Yen', relation: 'Spouse', age: 32 },
+                                { name: 'Baby Lin', relation: 'Child', age: 2 },
+                                { name: 'Grandma Fan', relation: 'Parent', age: 65 }
+                            ]
+                        }
+                    }
+                );
+            }
             if (result.success) {
                 console.log('User created successfully.');
                 user = result.user;
@@ -35,6 +62,21 @@ async function seed() {
         } else {
             console.log('User already exists.');
         }
+
+        // Always update family members to ensure they are seeded correctly
+        console.log('Updating family members...');
+        await mongoose.connection.collection('users').updateOne(
+            { username: TARGET_USER },
+            {
+                $set: {
+                    familyMembers: [
+                        { name: 'Yen', relation: 'Spouse', age: 32 },
+                        { name: 'Baby Lin', relation: 'Child', age: 2 },
+                        { name: 'Grandma Fan', relation: 'Parent', age: 65 }
+                    ]
+                }
+            }
+        );
 
         // 2. Add Appointments
         console.log('Adding appointments...');
@@ -181,17 +223,66 @@ async function seed() {
         }
         console.log('Medical tests added.');
 
-        // 6. Add More Vitals (BP, Pulse, Temp)
-        const moreVitals = [
-            { type: 'bloodPressure', value: 120, unit: 'mmHg', date: new Date(), notes: 'Systolic' },
-            { type: 'pulse', value: 72, unit: 'bpm', date: new Date() },
-            { type: 'temperature', value: 98.6, unit: '°F', date: new Date() }
-        ];
+        // 6. Add Detailed Body Measurement Data (BP, Weight, Height)
+        console.log('Adding detailed body measurements...');
 
-        for (const v of moreVitals) {
-            await vitals.addVital(TARGET_USER, v);
+        // Clear existing vitals
+        await mongoose.connection.collection('vitals').deleteMany({ username: TARGET_USER.toLowerCase() });
+
+        const measurements = [];
+        const today = new Date();
+
+        // 6a. Height (Static)
+        measurements.push({
+            type: 'height',
+            value: 165,
+            unit: 'cm',
+            date: new Date(today.getFullYear(), today.getMonth() - 6, 1),
+            notes: 'Baseline height'
+        });
+
+        // 6b. Weight (Weekly for 3 months)
+        let weight = 145; // starting lbs
+        for (let i = 12; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - (i * 7));
+            // Slight fluctuation
+            const variance = (Math.random() * 2) - 1;
+            weight += variance;
+
+            measurements.push({
+                type: 'weight',
+                value: parseFloat(weight.toFixed(1)),
+                unit: 'lb',
+                date: date
+            });
         }
-        console.log('Additional vitals added.');
+
+        // 6c. Blood Pressure (2-3 times a week for 3 months)
+        for (let i = 25; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - (i * 3)); // every 3 days approx
+
+            // Randomized but realistic BP (e.g., 115-125 / 75-85)
+            const sys = Math.floor(115 + Math.random() * 15);
+            const dia = Math.floor(75 + Math.random() * 10);
+            const pulse = Math.floor(65 + Math.random() * 15);
+
+            measurements.push({
+                type: 'bloodPressure',
+                systolic: sys,
+                diastolic: dia,
+                pulse: pulse,
+                unit: 'mmHg',
+                date: date,
+                notes: i % 5 === 0 ? 'Morning reading' : ''
+            });
+        }
+
+        for (const m of measurements) {
+            await vitals.addVital(TARGET_USER, m);
+        }
+        console.log(`Added ${measurements.length} body measurement records.`);
 
         console.log('Seeding completed successfully.');
         process.exit(0);

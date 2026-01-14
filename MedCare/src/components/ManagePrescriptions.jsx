@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../services/api.js';
+import DeleteButton from './DeleteButton.jsx';
 import './ManagePrescriptions.css';
 
 function ManagePrescriptions({ user }) {
@@ -77,13 +78,11 @@ function ManagePrescriptions({ user }) {
     }
 
     async function handleDelete(id) {
-        if (window.confirm('Are you sure you want to delete this prescription?')) {
-            try {
-                await api.deletePrescription(id);
-                fetchPrescriptions();
-            } catch (err) {
-                setError('Failed to delete prescription');
-            }
+        try {
+            await api.deletePrescription(id);
+            fetchPrescriptions();
+        } catch (err) {
+            setError('Failed to delete prescription');
         }
     }
 
@@ -265,9 +264,10 @@ function ManagePrescriptions({ user }) {
                                 <button className="edit-btn" onClick={() => handleEdit(prescription)}>
                                     Edit
                                 </button>
-                                <button className="delete-btn" onClick={() => handleDelete(prescription.id)}>
-                                    Delete
-                                </button>
+                                <DeleteButton
+                                    onDelete={() => handleDelete(prescription.id)}
+                                    className="delete-btn"
+                                />
                             </div>
                         </div>
                     ))

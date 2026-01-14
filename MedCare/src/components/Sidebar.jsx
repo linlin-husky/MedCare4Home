@@ -34,7 +34,8 @@ function Sidebar({ currentPage, navigateTo }) {
         {
             title: 'ACCOUNT',
             items: [
-                { id: 'profile', label: 'My Profile', icon: 'user' }
+                { id: 'profile', label: 'My Profile', icon: 'user' },
+                { id: 'directory', label: 'User Directory', icon: 'users' }
             ]
         }
     ];

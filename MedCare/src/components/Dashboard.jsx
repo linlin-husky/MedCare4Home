@@ -114,13 +114,18 @@ function Dashboard({ user, navigateTo }) {
         <div
           className="metric-card appointment-card"
           onClick={() => navigateTo('calendar')}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigateTo('calendar')}
+          role="button"
+          tabIndex="0"
           style={{ cursor: 'pointer' }}
           title="Go to Calendar"
+          aria-label="Go to Calendar"
         >
           <div className="card-header-clean">
             <h3>Upcoming Appointment</h3>
             <button
               className="dashboard-add-btn"
+              aria-label="Add Appointment"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowAddModal(true);
@@ -179,8 +184,12 @@ function Dashboard({ user, navigateTo }) {
         <div
           className="metric-card medication-card"
           onClick={() => navigateTo('manage-prescriptions')}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigateTo('manage-prescriptions')}
+          role="button"
+          tabIndex="0"
           style={{ cursor: 'pointer' }}
           title="Manage Prescriptions"
+          aria-label="Manage Prescriptions"
         >
           <div className="card-header-clean">
             <div className="blue-accent-bar"></div>
@@ -209,7 +218,7 @@ function Dashboard({ user, navigateTo }) {
           <div className="profile-image-container">
             <div className="profile-avatar">
               {/* Placeholder Avatar */}
-              <svg viewBox="0 0 24 24" fill="#ff6b6b" width="60" height="60">
+              <svg viewBox="0 0 24 24" fill="#ff6b6b" width="60" height="60" role="img" aria-label="Profile Avatar">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
               </svg>
             </div>
@@ -232,7 +241,15 @@ function Dashboard({ user, navigateTo }) {
             </div>
           </div>
 
-          <div className="test-item" onClick={() => navigateTo('tests')} style={{ cursor: 'pointer' }}>
+          <div
+            className="test-item"
+            onClick={() => navigateTo('tests')}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigateTo('tests')}
+            role="button"
+            tabIndex="0"
+            style={{ cursor: 'pointer' }}
+            aria-label="View Medical Tests"
+          >
             <div className="test-status-dot"></div>
             <div className="test-info">
               <div className="test-name">
@@ -294,30 +311,33 @@ function Dashboard({ user, navigateTo }) {
             <h3>Add Appointment</h3>
             <form onSubmit={handleAddAppointment}>
               <div className="form-group">
-                <label>Title</label>
+                <label>Title *</label>
                 <input
                   type="text"
                   value={newAppt.title}
                   onChange={e => setNewAppt({ ...newAppt, title: e.target.value })}
                   required
+                  aria-required="true"
                 />
               </div>
               <div className="form-group">
-                <label>Date</label>
+                <label>Date *</label>
                 <input
                   type="date"
                   value={newAppt.date}
                   onChange={e => setNewAppt({ ...newAppt, date: e.target.value })}
                   required
+                  aria-required="true"
                 />
               </div>
               <div className="form-group">
-                <label>Time</label>
+                <label>Time *</label>
                 <input
                   type="time"
                   value={newAppt.time}
                   onChange={e => setNewAppt({ ...newAppt, time: e.target.value })}
                   required
+                  aria-required="true"
                 />
               </div>
               <div className="form-group">

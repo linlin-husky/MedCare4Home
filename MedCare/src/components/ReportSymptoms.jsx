@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../services/api.js';
+import DeleteButton from './DeleteButton.jsx';
 import './ReportSymptoms.css';
 
 function ReportSymptoms({ user }) {
@@ -56,13 +57,11 @@ function ReportSymptoms({ user }) {
     }
 
     async function handleDelete(id) {
-        if (window.confirm('Are you sure you want to delete this symptom?')) {
-            try {
-                await api.deleteSymptom(id);
-                fetchSymptoms();
-            } catch (err) {
-                setError('Failed to delete symptom');
-            }
+        try {
+            await api.deleteSymptom(id);
+            fetchSymptoms();
+        } catch (err) {
+            setError('Failed to delete symptom');
         }
     }
 
@@ -210,12 +209,10 @@ function ReportSymptoms({ user }) {
                             </div>
 
                             <div className="symptom-actions">
-                                <button
+                                <DeleteButton
+                                    onDelete={() => handleDelete(symptom.id)}
                                     className="delete-btn"
-                                    onClick={() => handleDelete(symptom.id)}
-                                >
-                                    Delete
-                                </button>
+                                />
                             </div>
                         </div>
                     ))

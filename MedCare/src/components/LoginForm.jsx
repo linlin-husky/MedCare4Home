@@ -93,15 +93,15 @@ function LoginForm({ onLogin, onSwitchToRegister, error, success }) {
           <ul className="features-list">
             <li className="feature-item">
               <span className="feature-icon"><img src={libraryBooksIcon} alt="" className="feature-svg" /></span>
-              <span>Track items you lend to friends and family</span>
+              <span>Complete Family Care, One Simple System</span>
             </li>
             <li className="feature-item">
               <span className="feature-icon"><img src={handshakeIcon} alt="" className="feature-svg" /></span>
-              <span>Build trusted lending relationships</span>
+              <span>You Health Data, Your Home, Your Control</span>
             </li>
             <li className="feature-item">
               <span className="feature-icon"><img src={starFilledIcon} alt="" className="feature-svg" /></span>
-              <span>Earn reputation through accountability</span>
+              <span>Make private healthcare   affordable for every family</span>
             </li>
           </ul>
         </div>

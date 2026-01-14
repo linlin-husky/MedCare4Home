@@ -19,6 +19,11 @@ function createUserRoutes(models) {
     next();
   };
 
+  router.get('/', requireAuth, async (req, res) => {
+    const allUsers = await users.getAllUsers();
+    res.json({ users: allUsers });
+  });
+
   router.get('/profile', requireAuth, async (req, res) => {
     const user = await users.getUser(req.username);
     if (!user) {
@@ -36,22 +41,29 @@ function createUserRoutes(models) {
       totalBorrowings: user.totalBorrowings,
       onTimeReturns: user.onTimeReturns,
       lateReturns: user.lateReturns,
-      memberSince: user.createdAt
+      memberSince: user.createdAt,
+      familyMembers: user.familyMembers
     });
   });
 
   router.put('/profile', requireAuth, async (req, res) => {
-    const { displayName, email, phone } = req.body;
+    const { displayName, email, phone, familyMembers } = req.body;
+    console.log('DEBUG: PUT /profile called');
+    console.log('DEBUG: Payload:', JSON.stringify(req.body, null, 2));
+    console.log('DEBUG: familyMembers from body:', familyMembers);
 
     if (email && !email.includes('@')) {
       return res.status(400).json({ error: 'invalid-email', message: 'Invalid email format' });
     }
 
-    const updatedUser = await users.updateUser(req.username, { displayName, email, phone });
+    const updatedUser = await users.updateUser(req.username, { displayName, email, phone, familyMembers });
 
     if (!updatedUser) {
       return res.status(404).json({ error: 'not-found', message: 'User not found' });
     }
+
+    console.log('DEBUG ROUTE: updatedUser keys:', Object.keys(updatedUser));
+    console.log('DEBUG ROUTE: updatedUser.familyMembers:', updatedUser.familyMembers);
 
     res.json({
       username: updatedUser.username,
@@ -59,7 +71,8 @@ function createUserRoutes(models) {
       email: updatedUser.email,
       phone: updatedUser.phone,
       trustScore: updatedUser.trustScore,
-      badge: users.getTrustBadge(updatedUser.trustScore)
+      badge: users.getTrustBadge(updatedUser.trustScore),
+      familyMembers: updatedUser.familyMembers
     });
   });
 

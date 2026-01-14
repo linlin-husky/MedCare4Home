@@ -17,6 +17,7 @@ import LoadingSpinner from './components/LoadingSpinner.jsx';
 import ErrorMessage from './components/ErrorMessage.jsx';
 import SuccessMessage from './components/SuccessMessage.jsx';
 import ProfileEdit from './components/ProfileEdit.jsx';
+import UserDirectory from './components/UserDirectory.jsx';
 
 import './App.css';
 
@@ -28,10 +29,11 @@ const PAGE_COMPONENTS = {
   'manage-prescriptions': ManagePrescriptions,
   'report-symptoms': ReportSymptoms,
   'body-measurement': BodyMeasurement,
-  'profile': ProfileEdit
+  'profile': ProfileEdit,
+  'directory': UserDirectory
 };
 
-const PROTECTED_PAGES = ['dashboard', 'calendar', 'tests', 'manage-prescriptions', 'report-symptoms', 'body-measurement', 'profile'];
+const PROTECTED_PAGES = ['dashboard', 'calendar', 'tests', 'manage-prescriptions', 'report-symptoms', 'body-measurement', 'profile', 'directory'];
 
 // ============ MAIN COMPONENT ============
 function App() {
@@ -135,9 +137,10 @@ function App() {
   // ============ RENDER AUTHENTICATED APP ============
   return (
     <div className="app">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <Sidebar currentPage={state.currentPage} navigateTo={navigateTo} />
 
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <header className="top-bar">
           <div className="user-info">
             {state.user && (
@@ -158,7 +161,12 @@ function App() {
 
         {/* Page Content */}
         {CurrentPageComponent ? (
-          <CurrentPageComponent user={state.user} navigateTo={navigateTo} />
+          <CurrentPageComponent
+            user={state.user}
+            navigateTo={navigateTo}
+            dispatch={dispatch}
+            state={state}
+          />
         ) : (
           <div className="page-placeholder">
             <h2>{state.currentPage.toUpperCase().replace('-', ' ')}</h2>

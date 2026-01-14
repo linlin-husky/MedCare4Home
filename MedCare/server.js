@@ -58,6 +58,11 @@ app.get('/api/auth/session', authController.checkSession);
 app.post('/api/auth/session', authController.createSession);
 app.delete('/api/auth/session', authController.endSession);
 
+// Debug endpoint
+app.get('/api/debug/version', (req, res) => {
+  res.json({ version: '1.0.1', timestamp: Date.now() });
+});
+
 // Other API routes
 app.use('/api/users', createUserRoutes(models));
 app.use('/api/appointments', createAppointmentRoutes(models));

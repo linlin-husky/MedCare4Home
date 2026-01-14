@@ -24,7 +24,14 @@ const userSchema = new mongoose.Schema({
   totalRatings: { type: Number, default: 0 },
   ratingSum: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
-  lastActive: { type: Date, default: Date.now }
+  lastActive: { type: Date, default: Date.now },
+
+  // Family Members
+  familyMembers: [{
+    name: { type: String },
+    relation: { type: String },
+    age: { type: Number }
+  }]
 });
 
 const User = mongoose.model('User', userSchema);
@@ -95,12 +102,17 @@ async function getUser(username) {
 }
 
 async function updateUser(username, updates) {
-  const allowedUpdates = ['displayName', 'email', 'phone'];
+  const allowedUpdates = ['displayName', 'email', 'phone', 'familyMembers'];
   const updateFields = {};
 
   for (const key of allowedUpdates) {
     if (updates[key] !== undefined) {
-      updateFields[key] = sanitizeInput(updates[key]);
+      if (key === 'familyMembers') {
+        console.log('DEBUG MODEL: Updating familyMembers with:', JSON.stringify(updates[key]));
+        updateFields[key] = updates[key]; // Don't sanitize array/objects as string
+      } else {
+        updateFields[key] = sanitizeInput(updates[key]);
+      }
     }
   }
   updateFields.lastActive = Date.now();

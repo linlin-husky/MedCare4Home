@@ -111,22 +111,77 @@ function ProfileEdit({ state, dispatch, navigateTo }) {
           </div>
 
           <div className="trust-stats">
-            <div className="stat">
-              <span className="stat-value">{profile.totalLendings}</span>
-              <span className="stat-label">Items Lent</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">{profile.totalBorrowings}</span>
-              <span className="stat-label">Items Borrowed</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">{profile.onTimeReturns}</span>
-              <span className="stat-label">On-time Returns</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">{profile.lateReturns}</span>
-              <span className="stat-label">Late Returns</span>
-            </div>
+            {profile.familyMembers && profile.familyMembers.length > 0 ? (
+              profile.familyMembers.map((member, index) => (
+                <div key={index} className="stat">
+                  <span className="stat-value">{member.relation}</span>
+                  <span className="stat-label">{member.name}</span>
+                </div>
+              ))
+            ) : (
+              <div className="stat">
+                <span className="stat-value">0</span>
+                <span className="stat-label">Family Members</span>
+              </div>
+            )}
+
+            {isEditing && (
+              <div className="add-family-member-container" style={{ gridColumn: '1 / -1', marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+                <h4 style={{ margin: '0 0 10px', fontSize: '0.875rem', color: '#666' }}>Add Family Member</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    id="new-member-name"
+                    className="form-input"
+                    style={{ padding: '8px', fontSize: '0.875rem' }}
+                  />
+                  <select
+                    id="new-member-relation"
+                    className="form-input"
+                    style={{ padding: '8px', fontSize: '0.875rem', backgroundColor: 'white' }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Relation</option>
+                    <option value="Parent">Parent</option>
+                    <option value="Kid">Kid</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Partner">Partner</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="edit-button"
+                    style={{ padding: '8px 15px', fontSize: '0.875rem', whiteSpace: 'nowrap' }}
+                    onClick={() => {
+                      const nameEl = document.getElementById('new-member-name');
+                      const relEl = document.getElementById('new-member-relation');
+                      const name = nameEl.value.trim();
+                      const relation = relEl.value.trim();
+
+                      if (!name || !relation) {
+                        return dispatch({ type: ACTIONS.SET_ERROR, payload: 'Please enter name and relation' });
+                      }
+
+                      const newMember = { name, relation, age: 0 };
+                      const updatedMembers = [...(profile.familyMembers || []), newMember];
+
+                      console.log('Frontend: Sending update', updatedMembers);
+                      api.updateUserProfile({ familyMembers: updatedMembers }).then(data => {
+                        console.log('Frontend: Update success', data);
+                        setProfile(prev => ({ ...prev, ...data }));
+                        nameEl.value = '';
+                        relEl.value = '';
+                      }).catch(err => {
+                        console.error('Frontend: Update failed', err);
+                        dispatch({ type: ACTIONS.SET_ERROR, payload: 'Failed to add member: ' + (err.message || 'Unknown error') });
+                      });
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <p className="member-since">Member since {formatDate(profile.memberSince)}</p>

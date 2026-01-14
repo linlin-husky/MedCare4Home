@@ -46,7 +46,7 @@ function Calendar({ user }) {
                 setNewAppt({ title: '', time: '', location: '', date: new Date().toISOString().split('T')[0] });
                 loadAppointments();
             })
-            .catch(err => alert(err.message));
+            .catch(err => (console.error('Failed to create appointment', err), alert(err.message)));
     }
 
     // Helper to render calendar grid
