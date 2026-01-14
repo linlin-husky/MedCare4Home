@@ -26,7 +26,8 @@ function ManagePrescriptions({ user }) {
         try {
             setLoading(true);
             const data = await api.getPrescriptions();
-            setPrescriptions(data);
+            // Handle both { medications: [] } and [] response formats
+            setPrescriptions(data.medications || data || []);
             setError(null);
         } catch (err) {
             console.error('Error fetching prescriptions:', err);
@@ -63,7 +64,7 @@ function ManagePrescriptions({ user }) {
 
     function handleEdit(prescription) {
         setFormData({
-            medicationName: prescription.medicationName,
+            medicationName: prescription.medicationName || prescription.name,
             dosage: prescription.dosage,
             frequency: prescription.frequency,
             instructions: prescription.instructions,
@@ -71,7 +72,7 @@ function ManagePrescriptions({ user }) {
             refillsRemaining: prescription.refillsRemaining,
             sideEffects: prescription.sideEffects
         });
-        setEditingId(prescription._id);
+        setEditingId(prescription.id);
         setShowForm(true);
     }
 
@@ -221,11 +222,11 @@ function ManagePrescriptions({ user }) {
                     </div>
                 ) : (
                     prescriptions.map(prescription => (
-                        <div key={prescription._id} className="prescription-card">
+                        <div key={prescription.id} className="prescription-card">
                             <div className="prescription-header">
-                                <h3>{prescription.medicationName}</h3>
+                                <h3>{prescription.medicationName || prescription.name}</h3>
                                 <span className={`status-badge ${prescription.status}`}>
-                                    {prescription.status}
+                                    {prescription.status || 'active'}
                                 </span>
                             </div>
 
@@ -264,7 +265,7 @@ function ManagePrescriptions({ user }) {
                                 <button className="edit-btn" onClick={() => handleEdit(prescription)}>
                                     Edit
                                 </button>
-                                <button className="delete-btn" onClick={() => handleDelete(prescription._id)}>
+                                <button className="delete-btn" onClick={() => handleDelete(prescription.id)}>
                                     Delete
                                 </button>
                             </div>

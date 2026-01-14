@@ -66,11 +66,14 @@ export default function MedicalTests() {
             }
 
             const data = await response.json();
-            setTests(data);
+            // Handle both { tests: [] } and [] response formats
+            const testsArray = data.tests || data || [];
+            setTests(Array.isArray(testsArray) ? testsArray : []);
             setError('');
         } catch (err) {
             setError('Failed to load medical tests');
             console.error(err);
+            setLoading(false);
         } finally {
             setLoading(false);
         }

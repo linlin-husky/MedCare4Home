@@ -33,11 +33,34 @@ function createMedicationRoutes(models) {
     router.post('/', requireAuth, async (req, res) => {
         try {
             const data = req.body;
-            if (!data.name) {
-                return res.status(400).json({ error: 'required-fields', message: 'Name is required' });
+            if (!data.name && !data.medicationName) {
+                return res.status(400).json({ error: 'required-fields', message: 'Medication name is required' });
             }
-            const med = await medications.addMedication(req.username, data);
+            // Support both 'name' and 'medicationName' fields
+            const medData = {
+                ...data,
+                name: data.medicationName || data.name
+            };
+            const med = await medications.addMedication(req.username, medData);
             res.status(201).json({ medication: med });
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    });
+
+    // PUT update medication
+    router.put('/:id', requireAuth, async (req, res) => {
+        try {
+            const data = req.body;
+            // Support both 'name' and 'medicationName' fields
+            if (data.medicationName && !data.name) {
+                data.name = data.medicationName;
+            }
+            const updated = await medications.updateMedication(req.params.id, req.username, data);
+            if (!updated) {
+                return res.status(404).json({ error: 'not-found', message: 'Medication not found' });
+            }
+            res.json({ medication: updated });
         } catch (err) {
             res.status(400).json({ error: err.message });
         }

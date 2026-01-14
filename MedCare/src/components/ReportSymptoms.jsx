@@ -24,11 +24,13 @@ function ReportSymptoms({ user }) {
         try {
             setLoading(true);
             const data = await api.getSymptoms();
-            setSymptoms(data);
+            // Handle both { symptoms: [] } and [] response formats
+            setSymptoms(data.symptoms || data || []);
             setError(null);
         } catch (err) {
             console.error('Error fetching symptoms:', err);
             setError('Failed to load symptoms');
+            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -176,7 +178,7 @@ function ReportSymptoms({ user }) {
                     </div>
                 ) : (
                     symptoms.map(symptom => (
-                        <div key={symptom._id} className="symptom-card">
+                        <div key={symptom.id} className="symptom-card">
                             <div className="symptom-header">
                                 <h3>{symptom.symptomName}</h3>
                                 <span className={`severity-badge ${symptom.severity}`}>
@@ -187,7 +189,7 @@ function ReportSymptoms({ user }) {
                             <div className="symptom-details">
                                 <div className="detail-row">
                                     <span className="label">Status:</span>
-                                    <span className="value">{symptom.status}</span>
+                                    <span className="value">{symptom.status || 'active'}</span>
                                 </div>
                                 <div className="detail-row">
                                     <span className="label">Onset Date:</span>
@@ -210,7 +212,7 @@ function ReportSymptoms({ user }) {
                             <div className="symptom-actions">
                                 <button
                                     className="delete-btn"
-                                    onClick={() => handleDelete(symptom._id)}
+                                    onClick={() => handleDelete(symptom.id)}
                                 >
                                     Delete
                                 </button>

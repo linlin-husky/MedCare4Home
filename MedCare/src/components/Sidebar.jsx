@@ -18,10 +18,10 @@ function Sidebar({ currentPage, navigateTo }) {
         {
             title: 'MEDICAL INSTRUCTION',
             items: [
-                { id: 'medications', label: 'Manage Prescriptions', icon: 'pill' },
-                { id: 'symptoms', label: 'Report Symptoms', icon: 'file-text' },
+                { id: 'manage-prescriptions', label: 'Manage Prescriptions', icon: 'pill' },
+                { id: 'report-symptoms', label: 'Report Symptoms', icon: 'file-text' },
                 { id: 'tests', label: 'Medical Test', icon: 'star' },
-                { id: 'body', label: 'Body Measurement', icon: 'activity' }
+                { id: 'body-measurement', label: 'Body Measurement', icon: 'activity' }
             ]
         },
         {

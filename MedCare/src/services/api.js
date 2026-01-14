@@ -108,15 +108,47 @@ function searchMedicalTests(query) {
   }).then(handleResponse);
 }
 
+// ============ MEDICATIONS/PRESCRIPTIONS ============
+function getMedications() {
+  return fetch('/api/medications', {
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
+function createMedication(data) {
+  return fetch('/api/medications', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  }).then(handleResponse);
+}
+
+function updateMedication(id, data) {
+  return fetch(`/api/medications/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  }).then(handleResponse);
+}
+
+function deleteMedication(id) {
+  return fetch(`/api/medications/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
 // ============ PRESCRIPTIONS ============
 function getPrescriptions() {
-  return fetch('/api/prescriptions', {
+  return fetch('/api/medications', {
     credentials: 'include'
   }).then(handleResponse);
 }
 
 function createPrescription(data) {
-  return fetch('/api/prescriptions', {
+  return fetch('/api/medications', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -125,7 +157,7 @@ function createPrescription(data) {
 }
 
 function updatePrescription(id, data) {
-  return fetch(`/api/prescriptions/${id}`, {
+  return fetch(`/api/medications/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -134,7 +166,7 @@ function updatePrescription(id, data) {
 }
 
 function deletePrescription(id) {
-  return fetch(`/api/prescriptions/${id}`, {
+  return fetch(`/api/medications/${id}`, {
     method: 'DELETE',
     credentials: 'include'
   }).then(handleResponse);
@@ -163,6 +195,30 @@ function deleteSymptom(id) {
   }).then(handleResponse);
 }
 
+// ============ VITALS ============
+function getVitals(type) {
+  const url = type ? `/api/vitals?type=${encodeURIComponent(type)}` : '/api/vitals';
+  return fetch(url, {
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
+function addVital(data) {
+  return fetch('/api/vitals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  }).then(handleResponse);
+}
+
+function deleteVital(id) {
+  return fetch(`/api/vitals/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
 // ============ EXPORTS ============
 export {
   // Auth
@@ -181,6 +237,11 @@ export {
   filterMedicalTestsByStatus,
   filterMedicalTestsByCategory,
   searchMedicalTests,
+  // Medications
+  getMedications,
+  createMedication,
+  updateMedication,
+  deleteMedication,
   // Prescriptions
   getPrescriptions,
   createPrescription,
@@ -189,5 +250,9 @@ export {
   // Symptoms
   getSymptoms,
   createSymptom,
-  deleteSymptom
+  deleteSymptom,
+  // Vitals
+  getVitals,
+  addVital,
+  deleteVital
 };
