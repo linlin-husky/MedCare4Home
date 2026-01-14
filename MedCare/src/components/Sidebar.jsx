@@ -29,6 +29,12 @@ function Sidebar({ currentPage, navigateTo }) {
             items: [
                 { id: 'pulse', label: 'Pulse Monitor', icon: 'heart', badge: 'Upcoming' },
                 { id: 'visualization', label: 'Visualization', icon: 'pie-chart', badge: 'Upcoming' }
+            ],
+        },
+        {
+            title: 'ACCOUNT',
+            items: [
+                { id: 'profile', label: 'My Profile', icon: 'user' }
             ]
         }
     ];

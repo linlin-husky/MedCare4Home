@@ -16,6 +16,7 @@ import BodyMeasurement from './components/BodyMeasurement.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import ErrorMessage from './components/ErrorMessage.jsx';
 import SuccessMessage from './components/SuccessMessage.jsx';
+import ProfileEdit from './components/ProfileEdit.jsx';
 
 import './App.css';
 
@@ -26,10 +27,11 @@ const PAGE_COMPONENTS = {
   'tests': MedicalTests,
   'manage-prescriptions': ManagePrescriptions,
   'report-symptoms': ReportSymptoms,
-  'body-measurement': BodyMeasurement
+  'body-measurement': BodyMeasurement,
+  'profile': ProfileEdit
 };
 
-const PROTECTED_PAGES = ['dashboard', 'calendar', 'tests', 'manage-prescriptions', 'report-symptoms', 'body-measurement'];
+const PROTECTED_PAGES = ['dashboard', 'calendar', 'tests', 'manage-prescriptions', 'report-symptoms', 'body-measurement', 'profile'];
 
 // ============ MAIN COMPONENT ============
 function App() {
@@ -139,7 +141,7 @@ function App() {
         <header className="top-bar">
           <div className="user-info">
             {state.user && (
-              <span>
+              <span onClick={() => navigateTo('profile')} style={{ cursor: 'pointer' }}>
                 Welcome, <b>{state.user.displayName}</b>
               </span>
             )}

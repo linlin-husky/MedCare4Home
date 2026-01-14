@@ -41,6 +41,23 @@ function logout() {
   }).then(handleResponse);
 }
 
+// ============ PROFILE ============
+function getUserProfile() {
+  return fetch('/api/users/profile', {
+    method: 'GET',
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
+function updateUserProfile(data) {
+  return fetch('/api/users/profile', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  }).then(handleResponse);
+}
+
 // ============ APPOINTMENTS ============
 function getAppointments() {
   return fetch('/api/appointments', {
@@ -226,6 +243,9 @@ export {
   register,
   login,
   logout,
+  // Profile
+  getUserProfile,
+  updateUserProfile,
   // Appointments
   getAppointments,
   createAppointment,

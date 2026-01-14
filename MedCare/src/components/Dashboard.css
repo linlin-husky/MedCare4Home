@@ -43,7 +43,7 @@
   opacity: 0.9;
 }
 
-.add-btn {
+.dashboard-add-btn {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -61,7 +61,7 @@
   transition: background 0.2s;
 }
 
-.add-btn:hover {
+.dashboard-add-btn:hover {
   background: #1976D2;
 }
 

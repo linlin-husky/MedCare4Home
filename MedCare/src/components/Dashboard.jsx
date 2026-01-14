@@ -3,24 +3,68 @@ import './Dashboard.css';
 import * as api from '../services/api.js';
 
 function Dashboard({ user, navigateTo }) {
-  // Mock data for initial view (will eventually fetch from API)
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      title: 'Check up for Yen',
-      time: '2:00 PM',
-      details: '@ Boston Medical Center',
-      date: 'Mon'
+  const [appointments, setAppointments] = useState([]);
+  const [medications, setMedications] = useState([]);
+  const [weightData, setWeightData] = useState([]);
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Calculate current week's days (Mon-Sun)
+  const getWeekDays = () => {
+    const today = new Date();
+    const day = today.getDay(); // 0 is Sun, 1 is Mon
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    const monday = new Date(today.setDate(diff));
+
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const nextDay = new Date(monday);
+      nextDay.setDate(monday.getDate() + i);
+      days.push(nextDay);
     }
-  ]);
+    return days;
+  };
 
-  const [medications] = useState([
-    { name: 'Acetaminophen', dose: '1 pill', icon: 'sun' },
-    { name: 'Atorvastatin', dose: '1 pill', icon: 'cloud' },
-    { name: 'Januvia', dose: '2 pills', icon: 'moon' }
-  ]);
+  const weekDays = getWeekDays();
 
-  const [weightData] = useState([150, 145, 140, 138, 142, 137, 135, 140, 145, 150, 140, 80]); // Mock chart data points
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    // Fetch initial data
+    const fetchData = async () => {
+      try {
+        const appts = await api.getAppointments();
+        if (appts && Array.isArray(appts.appointments)) {
+          setAppointments(appts.appointments);
+        } else if (Array.isArray(appts)) {
+          setAppointments(appts);
+        }
+
+        const meds = await api.getMedications();
+        if (meds && Array.isArray(meds.medications)) {
+          setMedications(meds.medications);
+        } else if (Array.isArray(meds)) {
+          setMedications(meds);
+        }
+
+        const vitals = await api.getVitals('weight');
+        const vList = vitals && (vitals.vitals || vitals);
+        if (Array.isArray(vList)) {
+          const weights = vList.map(v => v.value);
+          if (weights.length > 0) setWeightData(weights);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard data', err);
+      }
+    };
+    fetchData();
+  }, [user]); // Re-fetch if user changes (e.g. login)
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newAppt, setNewAppt] = useState({
@@ -56,28 +100,67 @@ function Dashboard({ user, navigateTo }) {
       <div className="dashboard-row">
 
         {/* Appointment Card */}
-        <div className="metric-card appointment-card">
+        <div
+          className="metric-card appointment-card"
+          onClick={() => navigateTo('calendar')}
+          style={{ cursor: 'pointer' }}
+          title="Go to Calendar"
+        >
           <div className="card-header-clean">
             <h3>Upcoming Appointment</h3>
-            <button className="add-btn" onClick={() => setShowAddModal(true)}>+</button>
+            <button
+              className="dashboard-add-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAddModal(true);
+              }}
+            >+</button>
           </div>
 
           <div className="appointment-main">
-            <div className="time-display">2:00 PM</div>
-            <div className="appt-title">{appointments[0].title}</div>
-            <div className="appt-loc">{appointments[0].details}</div>
+            <div className="time-display">
+              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            {appointments.filter(appt => {
+              const apptDate = new Date(appt.date);
+              return apptDate.getDate() === selectedDate.getDate() &&
+                apptDate.getMonth() === selectedDate.getMonth() &&
+                apptDate.getFullYear() === selectedDate.getFullYear();
+            }).length > 0 ? (
+              appointments.filter(appt => {
+                const apptDate = new Date(appt.date);
+                return apptDate.getDate() === selectedDate.getDate() &&
+                  apptDate.getMonth() === selectedDate.getMonth() &&
+                  apptDate.getFullYear() === selectedDate.getFullYear();
+              }).map((appt, i) => (
+                <div key={i}>
+                  <div className="appt-title">{appt.title}</div>
+                  <div className="appt-loc">@ {appt.location}</div>
+                </div>
+              ))
+            ) : (
+              <div className="appt-title">No appointments</div>
+            )}
           </div>
 
           <div className="calendar-strip">
-            <div className="day-box active">
-              <span className="day-name">Mon</span>
-            </div>
-            <div className="day-box"><span className="day-name">Tue</span></div>
-            <div className="day-box"><span className="day-name">Wed</span></div>
-            <div className="day-box"><span className="day-name">Thu</span></div>
-            <div className="day-box"><span className="day-name">Fri</span></div>
-            <div className="day-box"><span className="day-name">Sat</span></div>
-            <div className="day-box"><span className="day-name">Sun</span></div>
+            {weekDays.map((date, index) => {
+              const isSelected = date.getDate() === selectedDate.getDate() &&
+                date.getMonth() === selectedDate.getMonth();
+              const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+              return (
+                <div
+                  key={index}
+                  className={`day-box ${isSelected ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedDate(date);
+                  }}
+                >
+                  <span className="day-name">{dayNames[date.getDay()]}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -91,10 +174,10 @@ function Dashboard({ user, navigateTo }) {
           <div className="medication-list">
             {medications.map((med, idx) => (
               <div key={idx} className="medication-item">
-                <div className={`med-icon icon-${med.icon}`}></div>
+                <div className={`med-icon icon-${med.icon || 'pill'}`}></div>
                 <div className="med-info">
                   <div className="med-name">{med.name}</div>
-                  <div className="med-dose">{med.dose}</div>
+                  <div className="med-dose">{med.dosage || med.dose}</div>
                 </div>
               </div>
             ))}
