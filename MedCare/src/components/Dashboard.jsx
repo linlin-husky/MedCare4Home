@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
+import * as api from '../services/api.js';
 
-function Dashboard({ user }) {
+function Dashboard({ user, navigateTo }) {
   // Mock data for initial view (will eventually fetch from API)
-  const [appointments] = useState([
+  const [appointments, setAppointments] = useState([
     {
       id: 1,
       title: 'Check up for Yen',
@@ -21,6 +22,34 @@ function Dashboard({ user }) {
 
   const [weightData] = useState([150, 145, 140, 138, 142, 137, 135, 140, 145, 150, 140, 80]); // Mock chart data points
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newAppt, setNewAppt] = useState({
+    title: '',
+    time: '',
+    location: '',
+    date: new Date().toISOString().split('T')[0]
+  });
+
+  const handleAddAppointment = (e) => {
+    e.preventDefault();
+    const dateTime = new Date(`${newAppt.date}T${newAppt.time || '12:00'}`);
+
+    api.createAppointment({
+      title: newAppt.title,
+      location: newAppt.location,
+      date: dateTime
+    })
+      .then(() => {
+        setShowAddModal(false);
+        setNewAppt({ title: '', time: '', location: '', date: new Date().toISOString().split('T')[0] });
+        // Refresh appointments
+        api.getAppointments()
+          .then(data => setAppointments(data.appointments || []))
+          .catch(err => console.error('Failed to load appointments', err));
+      })
+      .catch(err => alert(err.message));
+  };
+
   return (
     <div className="dashboard-container">
       {/* Top Row */}
@@ -30,7 +59,7 @@ function Dashboard({ user }) {
         <div className="metric-card appointment-card">
           <div className="card-header-clean">
             <h3>Upcoming Appointment</h3>
-            <button className="add-btn">+</button>
+            <button className="add-btn" onClick={() => setShowAddModal(true)}>+</button>
           </div>
 
           <div className="appointment-main">
@@ -151,6 +180,55 @@ function Dashboard({ user }) {
         </div>
 
       </div>
+
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Add Appointment</h3>
+            <form onSubmit={handleAddAppointment}>
+              <div className="form-group">
+                <label>Title</label>
+                <input
+                  type="text"
+                  value={newAppt.title}
+                  onChange={e => setNewAppt({ ...newAppt, title: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  value={newAppt.date}
+                  onChange={e => setNewAppt({ ...newAppt, date: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Time</label>
+                <input
+                  type="time"
+                  value={newAppt.time}
+                  onChange={e => setNewAppt({ ...newAppt, time: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Location</label>
+                <input
+                  type="text"
+                  value={newAppt.location}
+                  onChange={e => setNewAppt({ ...newAppt, location: e.target.value })}
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" onClick={() => setShowAddModal(false)}>Cancel</button>
+                <button type="submit" className="save-btn">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

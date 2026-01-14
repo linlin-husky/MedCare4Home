@@ -156,7 +156,7 @@ function App() {
 
         {/* Page Content */}
         {CurrentPageComponent ? (
-          <CurrentPageComponent user={state.user} />
+          <CurrentPageComponent user={state.user} navigateTo={navigateTo} />
         ) : (
           <div className="page-placeholder">
             <h2>{state.currentPage.toUpperCase().replace('-', ' ')}</h2>
