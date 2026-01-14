@@ -5,7 +5,7 @@ import handshakeIcon from '../assets/icons/handshake.svg';
 import starFilledIcon from '../assets/icons/star-filled.svg';
 import './LoginForm.css';
 
-function LoginForm({ onLogin, onSwitchToRegister, error }) {
+function LoginForm({ onLogin, onSwitchToRegister, error, success }) {
   const [username, setUsername] = useState('');
   const [errors, setErrors] = useState([]);
 
@@ -36,6 +36,12 @@ function LoginForm({ onLogin, onSwitchToRegister, error }) {
           <h1 className="auth-title">Home Medical Care</h1>
           <p className="auth-subtitle">Your Social Lending Community</p>
         </div>
+
+        {success && (
+          <div className="success-banner">
+            {success}
+          </div>
+        )}
 
         {error && (
           <div className="error-banner">

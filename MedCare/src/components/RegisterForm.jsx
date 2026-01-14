@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { validateUsername, validateEmail, validatePhone } from '../utils/helpers.js';
 import ErrorMessage from './ErrorMessage.jsx';
-import SuccessMessage from './SuccessMessage.jsx';
 import './LoginForm.css';
 
 function RegisterForm({ onRegister, onSwitchToLogin, error, success }) {
@@ -74,7 +73,11 @@ function RegisterForm({ onRegister, onSwitchToLogin, error, success }) {
           <h2 className="form-title">Create Account</h2>
 
           {error && <ErrorMessage message={error} />}
-          {success && <SuccessMessage message={success} />}
+          {success && (
+            <div className="success-banner">
+              {success}
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="register-username" className="form-label">

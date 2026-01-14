@@ -49,93 +49,92 @@ function appReducer(state, action) {
   switch (action.type) {
     case ACTIONS.SET_LOADING:
       return { ...state, isLoading: action.payload };
-    
+
     case ACTIONS.SET_ERROR:
       return { ...state, error: action.payload, isLoading: false };
-    
+
     case ACTIONS.CLEAR_ERROR:
       return { ...state, error: null };
-    
+
     case ACTIONS.SET_SUCCESS:
       return { ...state, success: action.payload };
-    
+
     case ACTIONS.CLEAR_SUCCESS:
       return { ...state, success: null };
-    
+
     case ACTIONS.SET_USER:
-      return { 
-        ...state, 
-        user: action.payload, 
+      return {
+        ...state,
+        user: action.payload,
         isLoggedIn: true,
         currentPage: 'dashboard',
         isLoading: false,
         unreadCount: action.payload.unreadCount || 0
       };
-    
+
     case ACTIONS.LOGOUT:
-      return { 
+      return {
         ...initialState,
         currentPage: 'login'
       };
-    
+
     case ACTIONS.SET_PAGE:
-      return { 
-        ...state, 
+      return {
+        ...state,
         currentPage: action.payload,
-        error: null,
-        success: null
+        error: null
       };
-    
+
     case ACTIONS.SET_ITEMS:
       return { ...state, items: action.payload };
-    
+
     case ACTIONS.ADD_ITEM:
       return { ...state, items: [...state.items, action.payload] };
-    
+
     case ACTIONS.UPDATE_ITEM:
-      return { 
-        ...state, 
-        items: state.items.map(item => 
+      return {
+        ...state,
+        items: state.items.map(item =>
           item.id === action.payload.id ? action.payload : item
         )
       };
-    
+
     case ACTIONS.REMOVE_ITEM:
-      return { 
-        ...state, 
+      return {
+        ...state,
         items: state.items.filter(item => item.id !== action.payload)
       };
-    
+
     case ACTIONS.SET_LENDINGS:
       return { ...state, lendings: action.payload };
-    
+
     case ACTIONS.SET_BORROWINGS:
       return { ...state, borrowings: action.payload };
-    
+
     case ACTIONS.SET_PENDING_REQUESTS:
       return { ...state, pendingRequests: action.payload };
-    
+
     case ACTIONS.SET_ACTIVITIES:
       return { ...state, activities: action.payload };
-    
+
     case ACTIONS.SET_UNREAD_COUNT:
       return { ...state, unreadCount: action.payload };
-    
+
     case ACTIONS.SET_ANALYTICS:
       return { ...state, analytics: action.payload };
-    
+
     case ACTIONS.SET_SELECTED_ITEM:
       return { ...state, selectedItem: action.payload };
-    
+
     case ACTIONS.SET_SELECTED_LENDING:
       return { ...state, selectedLending: action.payload };
-    
+
     case ACTIONS.SET_PUBLIC_ITEMS:
       return { ...state, publicItems: action.payload };
-    
+
     case ACTIONS.SET_SEARCH_RESULTS:
       return { ...state, searchResults: action.payload };
-    
+
     default:
       return state;
   }

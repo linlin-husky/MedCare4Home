@@ -74,7 +74,7 @@ function App() {
 
     api.register(formData.username, formData.displayName, formData.email, formData.phone)
       .then(userData => {
-        dispatch({ type: ACTIONS.SET_USER, payload: userData });
+        dispatch({ type: ACTIONS.SET_LOADING, payload: false });
         dispatch({ type: ACTIONS.SET_SUCCESS, payload: SUCCESS_MESSAGES.SIGNUP_SUCCESS });
       })
       .catch(err => {
@@ -122,6 +122,7 @@ function App() {
         onLogin={handleLogin}
         onSwitchToRegister={() => navigateTo('register')}
         error={state.error}
+        success={state.success}
       />
     );
   }
