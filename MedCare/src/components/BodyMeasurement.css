@@ -1,0 +1,38 @@
+.body-measurement {
+    flex: 1;
+    padding: 30px;
+}
+
+.body-measurement h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.measurements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.measurement-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.04);
+}
+
+.measurement-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+.measurement-card .value {
+    font-size: 32px;
+    font-weight: 600;
+    color: #1abc9c;
+}

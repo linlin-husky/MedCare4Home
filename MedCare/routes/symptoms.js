@@ -2,9 +2,9 @@
 
 import express from 'express';
 
-function createVitalsRoutes(models) {
+function createSymptomRoutes(models) {
     const router = express.Router();
-    const { vitals, sessions } = models;
+    const { symptoms, sessions } = models;
 
     const requireAuth = async (req, res, next) => {
         const sid = req.cookies.sid;
@@ -19,35 +19,32 @@ function createVitalsRoutes(models) {
         next();
     };
 
-    // GET all vitals
     router.get('/', requireAuth, async (req, res) => {
         try {
-            const vitalsList = await vitals.getVitals(req.username, req.query.type);
-            res.json({ vitals: vitalsList });
+            const symptomsList = await symptoms.getSymptoms(req.username);
+            res.json({ symptoms: symptomsList });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
     });
 
-    // POST new vital
     router.post('/', requireAuth, async (req, res) => {
         try {
             const data = req.body;
-            if (!data.type || !data.value) {
-                return res.status(400).json({ error: 'required-fields', message: 'Type and value are required' });
+            if (!data.symptomName || !data.severity) {
+                return res.status(400).json({ error: 'required-fields', message: 'Symptom name and severity are required' });
             }
-            const vital = await vitals.addVital(req.username, data);
-            res.status(201).json({ vital });
+            const symptom = await symptoms.addSymptom(req.username, data);
+            res.status(201).json({ symptom });
         } catch (err) {
             res.status(400).json({ error: err.message });
         }
     });
 
-    // DELETE vital
     router.delete('/:id', requireAuth, async (req, res) => {
         try {
-            await vitals.removeVital(req.params.id, req.username);
-            res.json({ message: 'Vital deleted' });
+            await symptoms.removeSymptom(req.params.id, req.username);
+            res.json({ message: 'Symptom deleted' });
         } catch (err) {
             res.status(400).json({ error: err.message });
         }
@@ -56,4 +53,4 @@ function createVitalsRoutes(models) {
     return router;
 }
 
-export default createVitalsRoutes;
+export default createSymptomRoutes;
