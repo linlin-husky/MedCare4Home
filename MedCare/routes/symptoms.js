@@ -70,6 +70,22 @@ function createSymptomRoutes(models) {
         }
     });
 
+    router.put('/:id', requireAuth, async (req, res) => {
+        try {
+            const data = req.body;
+            // Basic ownership verification is implicit in updateSymptom via username matching
+            // But we should verify 'targetUser' if switching ownership was possible (it's not for symptoms usually)
+
+            const updated = await symptoms.updateSymptom(req.params.id, req.username, data);
+            if (!updated) {
+                return res.status(404).json({ error: 'not-found', message: 'Symptom not found or unauthorized' });
+            }
+            res.json({ symptom: updated });
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    });
+
     router.delete('/:id', requireAuth, async (req, res) => {
         try {
             await symptoms.removeSymptom(req.params.id, req.username);

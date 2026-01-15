@@ -219,6 +219,15 @@ function createSymptom(data) {
   }).then(handleResponse);
 }
 
+function updateSymptom(id, data) {
+  return fetch(`/api/symptoms/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  }).then(handleResponse);
+}
+
 function deleteSymptom(id) {
   return fetch(`/api/symptoms/${id}`, {
     method: 'DELETE',
@@ -307,6 +316,7 @@ export {
   // Symptoms
   getSymptoms,
   createSymptom,
+  updateSymptom,
   deleteSymptom,
   // Vitals
   getVitals,

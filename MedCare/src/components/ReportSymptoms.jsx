@@ -7,15 +7,24 @@ function ReportSymptoms({ user }) {
     const [symptoms, setSymptoms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showForm, setShowForm] = useState(false);
+    const [showForm, setShowForm] = useState(true);
+    const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({
         symptomName: '',
-        severity: 'mild',
+        severityValue: 5,
         description: '',
         onsetDate: new Date().toISOString().split('T')[0],
-        duration: '',
+        status: 'ongoing',
+        isOngoing: true,
+        impactLevel: 'none',
+        impactDescription: '',
         relatedMedications: []
     });
+
+    const commonSymptoms = [
+        "Headache", "Fever", "Fatigue", "Cough", "Nausea",
+        "Dizziness", "Pain", "Anxiety", "Insomnia", "Shortness of Breath"
+    ];
 
     const [selectedUsername, setSelectedUsername] = useState(user?.username);
 
@@ -44,7 +53,6 @@ function ReportSymptoms({ user }) {
         try {
             setLoading(true);
             const data = await api.getSymptoms(selectedUsername);
-            // Handle both { symptoms: [] } and [] response formats
             setSymptoms(data.symptoms || data || []);
             setError(null);
         } catch (err) {
@@ -59,24 +67,63 @@ function ReportSymptoms({ user }) {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            const submitData = { ...formData, username: selectedUsername };
-            await api.createSymptom(submitData);
-            setFormData({
-                symptomName: '',
-                severity: 'mild',
-                description: '',
-                onsetDate: new Date().toISOString().split('T')[0],
-                duration: '',
-                relatedMedications: []
-            });
-            setShowForm(false);
+            const submitData = {
+                ...formData,
+                severity: getSeverityCategory(formData.severityValue),
+                duration: formData.isOngoing ? 'Ongoing' : formData.duration,
+                username: selectedUsername
+            };
+
+            if (editingId) {
+                await api.updateSymptom(editingId, submitData);
+            } else {
+                await api.createSymptom(submitData);
+            }
+
+            resetForm();
             fetchSymptoms();
         } catch (err) {
             setError('Failed to save symptom');
         }
     }
 
+    function resetForm() {
+        setFormData({
+            symptomName: '',
+            severityValue: 5,
+            description: '',
+            onsetDate: new Date().toISOString().split('T')[0],
+            status: 'ongoing',
+            isOngoing: true,
+            impactLevel: 'none',
+            impactDescription: '',
+            relatedMedications: []
+        });
+        setEditingId(null);
+        setShowForm(false);
+    }
+
+    function handleEdit(symptom) {
+        setEditingId(symptom.id);
+        setFormData({
+            symptomName: symptom.symptomName,
+            severityValue: symptom.severityValue || 5, // Fallback if missing
+            description: symptom.description || '',
+            onsetDate: new Date(symptom.onsetDate).toISOString().split('T')[0],
+            status: symptom.status || 'ongoing',
+            isOngoing: symptom.duration === 'Ongoing',
+            duration: symptom.duration === 'Ongoing' ? '' : symptom.duration || '',
+            impactLevel: symptom.impactLevel || 'none',
+            impactDescription: symptom.impactDescription || '',
+            relatedMedications: symptom.relatedMedications || []
+        });
+        setShowForm(true);
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     async function handleDelete(id) {
+        if (!window.confirm('Are you sure you want to delete this report?')) return;
         try {
             await api.deleteSymptom(id);
             fetchSymptoms();
@@ -86,26 +133,42 @@ function ReportSymptoms({ user }) {
     }
 
     function handleChange(e) {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     }
 
+    function getSeverityCategory(val) {
+        if (val <= 3) return 'mild';
+        if (val <= 7) return 'moderate';
+        return 'severe';
+    }
+
+    function handleImpactSelect(level) {
+        setFormData(prev => ({ ...prev, impactLevel: level }));
+    }
+
+    // Split symptoms into Active and History
+    const activeSymptoms = symptoms.filter(s => s.status === 'ongoing' || !s.status);
+    const resolvedSymptoms = symptoms.filter(s => s.status === 'resolved' || s.status === 'improving');
+
     if (loading) {
-        return <div className="report-symptoms"><p>Loading symptoms...</p></div>;
+        return <div className="report-symptoms"><p>Loading details...</p></div>;
     }
 
     return (
         <div className="report-symptoms">
             <div className="symptoms-header">
-                <h1>Report Symptoms</h1>
+                <div>
+                    <h1>Report Symptoms</h1>
+                    <p className="subtitle">Log your daily health to spot trends over time.</p>
+                </div>
                 <div className="header-actions">
                     <div className="profile-selector">
-                        <label htmlFor="profile-select">Profile:</label>
+                        <span className="profile-label"> for:</span>
                         <select
-                            id="profile-select"
                             className="profile-dropdown"
                             value={selectedUsername}
                             onChange={(e) => setSelectedUsername(e.target.value)}
@@ -117,48 +180,103 @@ function ReportSymptoms({ user }) {
                             ))}
                         </select>
                     </div>
-                    <button className="add-btn" onClick={() => setShowForm(!showForm)}>
-                        + Report Symptom
-                    </button>
                 </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}
 
-            {showForm && (
-                <div className="symptom-form-container">
+            {/* ACTION CARD */}
+            {!showForm ? (
+                <div className="action-card" onClick={() => { resetForm(); setShowForm(true); }}>
+                    <div className="plus-icon">+</div>
+                    <div className="action-text">
+                        <h3>Log a New Symptom</h3>
+                        <p>Track a new health concern or daily observation.</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="symptom-form-card">
+                    <div className="card-header">
+                        <h2>{editingId ? 'Edit Observation' : 'New Observation'}</h2>
+                        <button className="close-btn" onClick={resetForm}>×</button>
+                    </div>
                     <form className="symptom-form" onSubmit={handleSubmit}>
-                        <h2>Report New Symptom</h2>
 
-                        <div className="form-group">
-                            <label>Symptom Name *</label>
+                        {/* 1. IDENTIFICATION */}
+                        <div className="form-section">
+                            <label className="section-label">What are you feeling?</label>
                             <input
-                                type="text"
+                                list="common-symptoms"
                                 name="symptomName"
                                 value={formData.symptomName}
                                 onChange={handleChange}
-                                placeholder="e.g., Headache, Fever"
+                                placeholder="Search or type symptom name..."
                                 required
+                                className="main-input"
+                                autoFocus
                             />
+                            <datalist id="common-symptoms">
+                                {commonSymptoms.map(s => <option key={s} value={s} />)}
+                            </datalist>
                         </div>
 
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label>Severity *</label>
-                                <select
-                                    name="severity"
-                                    value={formData.severity}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="mild">Mild</option>
-                                    <option value="moderate">Moderate</option>
-                                    <option value="severe">Severe</option>
-                                </select>
+                        {/* 2. SEVERITY */}
+                        <div className="form-section">
+                            <div className="label-row">
+                                <label className="section-label">Intensity (1-10)</label>
+                                <span className={`severity-score score-${getSeverityCategory(formData.severityValue)}`}>
+                                    {formData.severityValue} - {getSeverityCategory(formData.severityValue).toUpperCase()}
+                                </span>
                             </div>
+                            <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                name="severityValue"
+                                value={formData.severityValue}
+                                onChange={handleChange}
+                                className={`severity-slider-hci slider-${getSeverityCategory(formData.severityValue)}`}
+                            />
+                            <div className="scale-labels">
+                                <span>No Pain</span>
+                                <span>Mild</span>
+                                <span>Moderate</span>
+                                <span>Severe</span>
+                                <span>Worst Possible</span>
+                            </div>
+                        </div>
 
-                            <div className="form-group">
-                                <label>Onset Date *</label>
+                        {/* 3. IMPACT */}
+                        <div className="form-section">
+                            <label className="section-label">Impact on Daily Life</label>
+                            <div className="impact-selector">
+                                {['none', 'mild', 'moderate', 'severe'].map(level => (
+                                    <button
+                                        key={level}
+                                        type="button"
+                                        className={`impact-btn ${formData.impactLevel === level ? 'selected' : ''} ${level}`}
+                                        onClick={() => handleImpactSelect(level)}
+                                    >
+                                        {level.charAt(0).toUpperCase() + level.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                            {formData.impactLevel !== 'none' && (
+                                <textarea
+                                    name="impactDescription"
+                                    value={formData.impactDescription}
+                                    onChange={handleChange}
+                                    placeholder="How does this stop you from doing your usual activities?"
+                                    className="impact-text"
+                                    rows="2"
+                                />
+                            )}
+                        </div>
+
+                        {/* 4. CONTEXT */}
+                        <div className="form-section context-grid">
+                            <div className="grid-item">
+                                <label>Onset Date</label>
                                 <input
                                     type="date"
                                     name="onsetDate"
@@ -167,92 +285,93 @@ function ReportSymptoms({ user }) {
                                     required
                                 />
                             </div>
+                            <div className="grid-item">
+                                <label>Status</label>
+                                <select name="status" value={formData.status} onChange={handleChange}>
+                                    <option value="ongoing">Ongoing (Active)</option>
+                                    <option value="improving">Improving</option>
+                                    <option value="resolved">Resolved</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div className="form-group">
-                            <label>Description</label>
+                        <div className="form-section">
+                            <label>Additional Notes</label>
                             <textarea
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
-                                placeholder="Describe your symptoms..."
-                                rows="3"
+                                placeholder="Any triggers, relief factors, or other observations?"
+                                rows="2"
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label>Duration</label>
-                            <input
-                                type="text"
-                                name="duration"
-                                value={formData.duration}
-                                onChange={handleChange}
-                                placeholder="e.g., 2 days, 1 week"
-                            />
-                        </div>
-
-                        <div className="form-buttons">
-                            <button type="submit" className="submit-btn">
-                                Report Symptom
-                            </button>
-                            <button
-                                type="button"
-                                className="cancel-btn"
-                                onClick={() => setShowForm(false)}
-                            >
-                                Cancel
+                        <div className="form-actions">
+                            <button type="button" className="cancel-ghost" onClick={resetForm}>Cancel</button>
+                            <button type="submit" className="save-primary">
+                                {editingId ? 'Update Entry' : 'Save Entry'}
                             </button>
                         </div>
                     </form>
                 </div>
             )}
 
-            <div className="symptoms-list">
-                {symptoms.length === 0 ? (
-                    <div className="empty-state">
-                        <p>No symptoms reported yet.</p>
-                    </div>
-                ) : (
-                    symptoms.map(symptom => (
-                        <div key={symptom.id} className="symptom-card">
-                            <div className="symptom-header">
-                                <h3>{symptom.symptomName}</h3>
-                                <span className={`severity-badge ${symptom.severity}`}>
-                                    {symptom.severity}
-                                </span>
-                            </div>
-
-                            <div className="symptom-details">
-                                <div className="detail-row">
-                                    <span className="label">Status:</span>
-                                    <span className="value">{symptom.status || 'active'}</span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="label">Onset Date:</span>
-                                    <span className="value">
-                                        {new Date(symptom.onsetDate).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="label">Duration:</span>
-                                    <span className="value">{symptom.duration || 'N/A'}</span>
-                                </div>
-                                {symptom.description && (
-                                    <div className="detail-row">
-                                        <span className="label">Description:</span>
-                                        <span className="value">{symptom.description}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="symptom-actions">
-                                <DeleteButton
-                                    onDelete={() => handleDelete(symptom.id)}
-                                    className="delete-btn"
-                                />
-                            </div>
+            <div className="symptoms-dashboard">
+                <div className="dashboard-section">
+                    <h3>Active Observations</h3>
+                    {activeSymptoms.length === 0 ? (
+                        <div className="empty-dash">
+                            <p>No active symptoms being tracked. Good health!</p>
                         </div>
-                    ))
+                    ) : (
+                        <div className="cards-grid">
+                            {activeSymptoms.map(s => (
+                                <div key={s.id} className="symptom-card-hci active">
+                                    <div className="card-top">
+                                        <h4>{s.symptomName}</h4>
+                                        <div className="severity-bubble">
+                                            <span className="sc-val">{s.severityValue || '-'}</span>
+                                            <span className="sc-max">/10</span>
+                                        </div>
+                                    </div>
+                                    <div className="card-meta">
+                                        <span>Started: {new Date(s.onsetDate).toLocaleDateString()}</span>
+                                        <span className="status-tag ongoing">Active</span>
+                                    </div>
+                                    {(s.impactLevel && s.impactLevel !== 'none') && (
+                                        <div className="impact-line">
+                                            <span className="i-label">Impact:</span> {s.impactLevel}
+                                        </div>
+                                    )}
+                                    <div className="card-actions">
+                                        <button className="text-btn" onClick={() => handleEdit(s)}>Edit</button>
+                                        <button className="text-btn delete" onClick={() => handleDelete(s.id)}>Delete</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {resolvedSymptoms.length > 0 && (
+                    <div className="dashboard-section">
+                        <h3>History</h3>
+                        <div className="history-list">
+                            {resolvedSymptoms.map(s => (
+                                <div key={s.id} className="history-row">
+                                    <div className="h-main">
+                                        <div className="h-top-row">
+                                            <span className="h-name">{s.symptomName}</span>
+                                            <span className="h-date">{new Date(s.onsetDate).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                    <span className="h-status resolved">Resolved</span>
+                                    <button className="icon-btn edit-icon" onClick={() => handleEdit(s)} title="Edit">✎</button>
+                                    <button className="icon-btn del-icon" onClick={() => handleDelete(s.id)} title="Delete">×</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
