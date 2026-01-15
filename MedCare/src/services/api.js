@@ -49,6 +49,13 @@ function getUserProfile() {
   }).then(handleResponse);
 }
 
+function getPublicProfile(username) {
+  return fetch(`/api/users/${encodeURIComponent(username)}`, {
+    method: 'GET',
+    credentials: 'include'
+  }).then(handleResponse);
+}
+
 function updateUserProfile(data) {
   return fetch('/api/users/profile', {
     method: 'PUT',
@@ -272,6 +279,7 @@ export {
   logout,
   // Profile
   getUserProfile,
+  getPublicProfile,
   updateUserProfile,
   getAllUsers,
   searchUsers,

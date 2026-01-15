@@ -229,7 +229,13 @@ async function getPublicProfile(username) {
     onTimeRate: user.onTimeReturns + user.lateReturns > 0
       ? Math.round((user.onTimeReturns / (user.onTimeReturns + user.lateReturns)) * 100)
       : 100,
-    memberSince: user.createdAt
+    memberSince: user.createdAt,
+    // Health Data for Dashboard
+    height: user.height,
+    weight: user.weight,
+    bmi: user.bmi,
+    bloodType: user.bloodType,
+    birthDate: user.birthDate
   };
 }
 
@@ -278,8 +284,23 @@ async function searchUsers(query) {
 // ... existing exports
 export { User }; // Named export for direct access
 export default {
-  // ... existing default export object
   sanitizeInput,
-  // ...
-  User // Also add to default object if needed, but named is better
+  isValidUsername,
+  isBannedUser,
+  isAdmin,
+  userExists,
+  createUser,
+  getUser,
+  updateUser,
+  updateTrustScore,
+  addRating,
+  recordReturn,
+  recordDispute,
+  incrementLendings,
+  incrementBorrowings,
+  getPublicProfile,
+  getTrustBadge,
+  getAllUsers,
+  searchUsers,
+  User
 };

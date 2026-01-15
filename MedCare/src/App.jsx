@@ -168,22 +168,6 @@ function App() {
                 <span onClick={() => navigateTo('profile')} style={{ cursor: 'pointer' }}>
                   Welcome, <b>{state.user.displayName}</b>
                 </span>
-
-                <div className="profile-selector-header">
-                  <label htmlFor="header-profile-select">Profile:</label>
-                  <select
-                    id="header-profile-select"
-                    className="profile-dropdown-header"
-                    value={selectedUsername}
-                    onChange={(e) => setSelectedUsername(e.target.value)}
-                  >
-                    {profiles.map(p => (
-                      <option key={p.username} value={p.username}>
-                        {p.displayName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
             )}
           </div>
@@ -205,6 +189,8 @@ function App() {
             dispatch={dispatch}
             state={state}
             selectedUsername={selectedUsername}
+            setSelectedUsername={setSelectedUsername}
+            profiles={profiles}
           />
         ) : (
           <div className="page-placeholder">

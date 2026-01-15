@@ -36,7 +36,7 @@ function createUserRoutes(models) {
       email: user.email,
       phone: user.phone,
       trustScore: user.trustScore,
-      badge: users.getTrustBadge(user.trustScore),
+      badge: getTrustBadge(user.trustScore),
       totalLendings: user.totalLendings,
       totalBorrowings: user.totalBorrowings,
       onTimeReturns: user.onTimeReturns,
@@ -45,6 +45,13 @@ function createUserRoutes(models) {
       familyMembers: user.familyMembers
     });
   });
+
+  function getTrustBadge(score) {
+    if (score >= 90) return { badge: 'Trust Star', color: 'gold' };
+    if (score >= 70) return { badge: 'Reliable', color: 'blue' };
+    if (score >= 50) return { badge: 'New User', color: 'gray' };
+    return { badge: 'At Risk', color: 'red' };
+  }
 
   router.put('/profile', requireAuth, async (req, res) => {
     const { displayName, email, phone, familyMembers } = req.body;

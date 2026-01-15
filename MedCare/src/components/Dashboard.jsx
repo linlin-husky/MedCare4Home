@@ -39,7 +39,7 @@ function Dashboard(props) {
   );
 }
 
-function DashboardContent({ user, navigateTo, selectedUsername }) { // Receive selectedUsername prop
+function DashboardContent({ user, navigateTo, selectedUsername, setSelectedUsername, profiles }) { // Receive props
   const [appointments, setAppointments] = useState([]);
   const [medications, setMedications] = useState([]);
   const [weightData, setWeightData] = useState([]);
@@ -47,6 +47,7 @@ function DashboardContent({ user, navigateTo, selectedUsername }) { // Receive s
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [familyWeightData, setFamilyWeightData] = useState({});
 
   // Calculate current week's days (Mon-Sun)
   const getWeekDays = () => {
@@ -73,48 +74,78 @@ function DashboardContent({ user, navigateTo, selectedUsername }) { // Receive s
     return () => clearInterval(timer);
   }, []);
 
+  const [displayUser, setDisplayUser] = useState(user);
+
   useEffect(() => {
     // Fetch initial data
     const fetchData = async () => {
       try {
-        const appts = await api.getAppointments(selectedUsername);
-        if (appts && Array.isArray(appts.appointments)) {
-          setAppointments(appts.appointments);
-        } else if (Array.isArray(appts)) {
-          setAppointments(appts);
-        }
+        try {
+          // Fetch Profile for selected user
+          if (selectedUsername) {
+            try {
+              if (selectedUsername === user.username) {
+                const profile = await api.getPublicProfile(selectedUsername);
+                setDisplayUser(profile.user || profile);
+              } else {
+                const profile = await api.getPublicProfile(selectedUsername);
+                setDisplayUser(profile.user || profile);
+              }
+            } catch (profileErr) {
+              console.warn(`Could not fetch profile for ${selectedUsername}, using fallback.`, profileErr);
+              // Fallback for family members who don't have a full User account
+              if (user && user.familyMembers) {
+                const member = user.familyMembers.find(m => m.username === selectedUsername);
+                if (member) {
+                  setDisplayUser({
+                    displayName: member.name,
+                    username: member.username,
+                    relation: member.relation,
+                    // We don't have height/weight in familyMembers array, will default to '-'
+                  });
+                }
+              }
+            }
+          }
 
-        const meds = await api.getMedications(selectedUsername);
-        if (meds && Array.isArray(meds.medications)) {
-          setMedications(meds.medications);
-        } else if (Array.isArray(meds)) {
-          setMedications(meds);
-        }
+          const appts = await api.getAppointments(selectedUsername);
+          if (appts && Array.isArray(appts.appointments)) {
+            setAppointments(appts.appointments);
+          } else if (Array.isArray(appts)) {
+            setAppointments(appts);
+          }
 
-        const vitals = await api.getVitals('weight', selectedUsername);
-        const vList = vitals && (vitals.vitals || vitals);
-        if (Array.isArray(vList)) {
-          const weights = vList.map(v => v.value);
-          if (weights.length > 0) setWeightData(weights);
-          else setWeightData([]);
-        } else {
-          setWeightData([]);
-        }
+          const meds = await api.getMedications(selectedUsername);
+          if (meds && Array.isArray(meds.medications)) {
+            setMedications(meds.medications);
+          } else if (Array.isArray(meds)) {
+            setMedications(meds);
+          }
 
-        const tests = await api.getMedicalTests(selectedUsername);
-        const tList = tests && (tests.tests || tests);
-        if (Array.isArray(tList)) {
-          setMedicalTests(tList);
-        } else {
-          setMedicalTests([]);
-        }
+          const vitals = await api.getVitals('weight', selectedUsername);
+          const vList = vitals && (vitals.vitals || vitals);
+          if (Array.isArray(vList)) {
+            const weights = vList.map(v => v.value);
+            if (weights.length > 0) setWeightData(weights);
+            else setWeightData([]);
+          } else {
+            setWeightData([]);
+          }
 
-      } catch (err) {
-        console.error('Failed to fetch dashboard data', err);
-      }
-    };
-    fetchData();
-  }, [user, selectedUsername]); // Re-fetch if user or selectedUsername changes
+          const tests = await api.getMedicalTests(selectedUsername);
+          const tList = tests && (tests.tests || tests);
+          if (Array.isArray(tList)) {
+            setMedicalTests(tList);
+          } else {
+            setMedicalTests([]);
+          }
+
+        } catch (err) {
+          console.error('Failed to fetch dashboard data', err);
+        }
+      };
+      fetchData();
+    }, [user, selectedUsername]); // Re-fetch if user or selectedUsername changes
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newAppt, setNewAppt] = useState({
@@ -211,32 +242,118 @@ function DashboardContent({ user, navigateTo, selectedUsername }) { // Receive s
       const values = allPoints.map(p => p.value);
       const dates = allPoints.map(p => new Date(p.date).getTime());
 
-      const minVal = Math.min(...values) * 0.9;
-      const maxVal = Math.max(...values) * 1.1;
+      // Calculate nice ranges
+      let minVal = Math.min(...values);
+      let maxVal = Math.max(...values);
+      if (minVal === maxVal) {
+        minVal -= 10;
+        maxVal += 10;
+      } else {
+        // Add padding
+        const padding = (maxVal - minVal) * 0.1;
+        minVal -= padding;
+        maxVal += padding;
+      }
+      // Ensure min is at least 0 if values are positive, or just round down
+      minVal = Math.max(0, Math.floor(minVal / 10) * 10);
+      maxVal = Math.ceil(maxVal / 10) * 10;
+
       const minDate = Math.min(...dates);
       const maxDate = Math.max(...dates);
 
-      // Check for division by zero if only 1 data point
+      // Dimensions
+      const fullWidth = 300;
+      const fullHeight = 150;
+      const margin = { top: 10, right: 15, bottom: 20, left: 30 };
+      const width = fullWidth - margin.left - margin.right;
+      const height = fullHeight - margin.top - margin.bottom;
+
       const valRange = maxVal - minVal || 10;
       const dateRange = maxDate - minDate || 1;
 
-      const width = 300;
-      const height = 150;
-      const padding = 10;
+      // Coordinate transformers
+      const getX = (dateMs) => ((dateMs - minDate) / dateRange) * width + margin.left;
+      const getY = (val) => height - ((val - minVal) / valRange) * height + margin.top;
 
-      return Object.entries(familyWeightData).map(([username, entry]) => {
+      // Generate Grid Lines & Y-Axis Labels
+      const gridLines = [];
+      const yLabels = [];
+      const step = (maxVal - minVal) / 4; // 5 lines
+      for (let i = 0; i <= 4; i++) {
+        const val = minVal + (step * i);
+        const y = getY(val);
+        gridLines.push(
+          <line
+            key={`grid-${i}`}
+            x1={margin.left}
+            y1={y}
+            x2={fullWidth - margin.right}
+            y2={y}
+            stroke="#e0e0e0"
+            strokeWidth="1"
+          />
+        );
+        yLabels.push(
+          <text
+            key={`ylabel-${i}`}
+            x={margin.left - 5}
+            y={y + 3} // vertical center adjustment
+            textAnchor="end"
+            fontSize="8"
+            fill="#666"
+          >
+            {Math.round(val)}
+          </text>
+        );
+      }
+
+      // Generate X-Axis Labels (Timeline)
+      const xLabels = [];
+      const startDate = new Date(minDate);
+      const endDate = new Date(maxDate);
+      // Rough heuristic: picking start, end, and middle
+      const datePoints = [startDate];
+      const midDate = new Date((minDate + maxDate) / 2);
+      if (maxDate - minDate > 86400000 * 60) { // If span > 2 months
+        datePoints.push(midDate);
+      }
+      datePoints.push(endDate);
+
+      // Better heuristic: Pick ~4-5 evenly spaced points
+      const numXLabels = 5;
+      for (let i = 0; i < numXLabels; i++) {
+        const t = minDate + (dateRange * (i / (numXLabels - 1)));
+        const d = new Date(t);
+        const x = getX(t);
+        const month = d.toLocaleString('default', { month: 'short' });
+        // const day = d.getDate();
+
+        xLabels.push(
+          <text
+            key={`xlabel-${i}`}
+            x={x}
+            y={fullHeight - 5}
+            textAnchor="middle"
+            fontSize="8"
+            fill="#666"
+          >
+            {month}
+          </text>
+        );
+      }
+
+
+      const lines = Object.entries(familyWeightData).map(([username, entry]) => {
         if (!entry.data || entry.data.length === 0) return null;
 
         const points = entry.data.map(d => {
-          const x = ((new Date(d.date).getTime() - minDate) / dateRange) * (width - 2 * padding) + padding;
-          const y = height - (((d.value - minVal) / valRange) * (height - 2 * padding) + padding); // Invert Y
-          return `${x},${y}`;
+          return `${getX(new Date(d.date).getTime())},${getY(d.value)}`;
         }).join(' ');
 
         // Last point for dot
         const last = entry.data[entry.data.length - 1];
-        const lastX = ((new Date(last.date).getTime() - minDate) / dateRange) * (width - 2 * padding) + padding;
-        const lastY = height - (((last.value - minVal) / valRange) * (height - 2 * padding) + padding);
+        const lastX = getX(new Date(last.date).getTime());
+        const lastY = getY(last.value);
 
         return (
           <g key={username}>
@@ -250,6 +367,19 @@ function DashboardContent({ user, navigateTo, selectedUsername }) { // Receive s
           </g>
         );
       });
+
+      return (
+        <g>
+          {gridLines}
+          {lines}
+          {/* Axes lines */}
+          <line x1={margin.left} y1={margin.top} x2={margin.left} y2={fullHeight - margin.bottom} stroke="#ccc" strokeWidth="1" />
+          <line x1={margin.left} y1={fullHeight - margin.bottom} x2={fullWidth - margin.right} y2={fullHeight - margin.bottom} stroke="#ccc" strokeWidth="1" />
+          {yLabels}
+          {xLabels}
+        </g>
+      );
+
     } catch (err) {
       console.error("Error rendering chart:", err);
       return null;
@@ -272,9 +402,28 @@ function DashboardContent({ user, navigateTo, selectedUsername }) { // Receive s
   return (
     <div className="dashboard-container">
       <div className="dashboard-header-row">
-        <div className="dashboard-header-row">
-          {/* Profile selector moved to App Header */}
+        <div className="dashboard-title">
+          <h1>Health Dashboard</h1>
+          <p>Welcome back, {user ? user.displayName : 'Guest'}</p>
         </div>
+
+        {profiles && profiles.length > 0 && (
+          <div className="profile-selector-container">
+            <label htmlFor="dashboard-profile-select">Profile:</label>
+            <select
+              id="dashboard-profile-select"
+              className="profile-dropdown-dashboard"
+              value={selectedUsername}
+              onChange={(e) => setSelectedUsername && setSelectedUsername(e.target.value)}
+            >
+              {profiles.map(p => (
+                <option key={p.username} value={p.username}>
+                  {p.displayName}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Top Row */}
@@ -394,19 +543,19 @@ function DashboardContent({ user, navigateTo, selectedUsername }) { // Receive s
             </div>
           </div>
 
-          <h2 className="profile-name">{user ? user.displayName : 'Guest'}</h2>
+          <h2 className="profile-name">{displayUser ? displayUser.displayName : 'Guest'}</h2>
 
           <div className="profile-stats">
             <div className="p-stat">
-              <div className="p-val">{user?.weight || 110} lb</div>
+              <div className="p-val">{displayUser?.weight || '-'} lb</div>
               <div className="p-lbl">Weight</div>
             </div>
             <div className="p-stat">
-              <div className="p-val">{user?.height || "5'4"}</div>
+              <div className="p-val">{displayUser?.height || '-'}</div>
               <div className="p-lbl">Height</div>
             </div>
             <div className="p-stat">
-              <div className="p-val">{user?.bmi || 20}</div>
+              <div className="p-val">{displayUser?.bmi || '-'}</div>
               <div className="p-lbl">BMI</div>
             </div>
           </div>
