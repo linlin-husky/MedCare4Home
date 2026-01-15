@@ -66,7 +66,7 @@ function RegisterForm({ onRegister, onSwitchToLogin, error, success }) {
       <div className="auth-container">
         <div className="auth-header">
           <h1 className="auth-title">Home Medical Care</h1>
-          <p className="auth-subtitle">Join the Lending Community</p>
+          <p className="auth-subtitle">Join the Medical Care Community</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>

@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, useState, useMemo } from 'react';
 import { ACTIONS, initialState, appReducer } from '../reducers/appReducer.js';
 import * as api from './services/api.js';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from './constants.js';
@@ -43,6 +43,26 @@ function App() {
   useEffect(() => {
     checkSession();
   }, []);
+
+  // ============ GLOBAL PROFILE STATE ============
+  const [selectedUsername, setSelectedUsername] = useState(null);
+
+  useEffect(() => {
+    if (state.user?.username && !selectedUsername) {
+      setSelectedUsername(state.user.username);
+    }
+  }, [state.user, selectedUsername]);
+
+  const profiles = useMemo(() => {
+    const list = [{ username: state.user?.username, displayName: 'Me' }];
+    if (state.user?.familyMembers) {
+      state.user.familyMembers.forEach(m => {
+        const username = m.username || `virtual:${state.user.username}:${m.name}`;
+        list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
+      });
+    }
+    return list;
+  }, [state.user]);
 
   const checkSession = useCallback(() => {
     dispatch({ type: ACTIONS.SET_LOADING, payload: true });
@@ -144,9 +164,27 @@ function App() {
         <header className="top-bar">
           <div className="user-info">
             {state.user && (
-              <span onClick={() => navigateTo('profile')} style={{ cursor: 'pointer' }}>
-                Welcome, <b>{state.user.displayName}</b>
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <span onClick={() => navigateTo('profile')} style={{ cursor: 'pointer' }}>
+                  Welcome, <b>{state.user.displayName}</b>
+                </span>
+
+                <div className="profile-selector-header">
+                  <label htmlFor="header-profile-select">Profile:</label>
+                  <select
+                    id="header-profile-select"
+                    className="profile-dropdown-header"
+                    value={selectedUsername}
+                    onChange={(e) => setSelectedUsername(e.target.value)}
+                  >
+                    {profiles.map(p => (
+                      <option key={p.username} value={p.username}>
+                        {p.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             )}
           </div>
           <button className="logout-btn" onClick={handleLogout}>
@@ -166,6 +204,7 @@ function App() {
             navigateTo={navigateTo}
             dispatch={dispatch}
             state={state}
+            selectedUsername={selectedUsername}
           />
         ) : (
           <div className="page-placeholder">

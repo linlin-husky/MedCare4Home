@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import * as api from '../services/api.js';
 
-function Dashboard({ user, navigateTo }) {
+function Dashboard({ user, navigateTo, selectedUsername }) { // Receive selectedUsername prop
   const [appointments, setAppointments] = useState([]);
   const [medications, setMedications] = useState([]);
   const [weightData, setWeightData] = useState([]);
@@ -10,25 +10,6 @@ function Dashboard({ user, navigateTo }) {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-
-  const [selectedUsername, setSelectedUsername] = useState(user?.username);
-
-  useEffect(() => {
-    if (user?.username && !selectedUsername) {
-      setSelectedUsername(user.username);
-    }
-  }, [user, selectedUsername]);
-
-  const profiles = React.useMemo(() => {
-    const list = [{ username: user?.username, displayName: 'Me' }];
-    if (user?.familyMembers) {
-      user.familyMembers.forEach(m => {
-        const username = m.username || `virtual:${user.username}:${m.name}`;
-        list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
-      });
-    }
-    return list;
-  }, [user]);
 
   // Calculate current week's days (Mon-Sun)
   const getWeekDays = () => {
@@ -134,20 +115,8 @@ function Dashboard({ user, navigateTo }) {
     <div className="dashboard-container">
       <div className="dashboard-header-row">
 
-        <div className="profile-selector">
-          <label htmlFor="profile-select">Profile:</label>
-          <select
-            id="profile-select"
-            className="profile-dropdown"
-            value={selectedUsername}
-            onChange={(e) => setSelectedUsername(e.target.value)}
-          >
-            {profiles.map(p => (
-              <option key={p.username} value={p.username}>
-                {p.displayName}
-              </option>
-            ))}
-          </select>
+        <div className="dashboard-header-row">
+          {/* Profile selector moved to App Header */}
         </div>
       </div>
 

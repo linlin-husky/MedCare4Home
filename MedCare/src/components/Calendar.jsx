@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as api from '../services/api.js';
 import './Calendar.css';
 
-function Calendar({ user }) {
+function Calendar({ user, selectedUsername }) { // Receive selectedUsername prop
     const [date, setDate] = useState(new Date());
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,25 +13,6 @@ function Calendar({ user }) {
         location: '',
         date: new Date().toISOString().split('T')[0]
     });
-
-    const [selectedUsername, setSelectedUsername] = useState(user?.username);
-
-    useEffect(() => {
-        if (user?.username && !selectedUsername) {
-            setSelectedUsername(user.username);
-        }
-    }, [user, selectedUsername]);
-
-    const profiles = React.useMemo(() => {
-        const list = [{ username: user?.username, displayName: 'Me' }];
-        if (user?.familyMembers) {
-            user.familyMembers.forEach(m => {
-                const username = m.username || `virtual:${user.username}:${m.name}`;
-                list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
-            });
-        }
-        return list;
-    }, [user]);
 
     useEffect(() => {
         loadAppointments();
@@ -122,21 +103,7 @@ function Calendar({ user }) {
             <div className="calendar-header">
                 <h1>Assignments & Appointments</h1>
                 <div className="header-actions">
-                    <div className="profile-selector">
-                        <label htmlFor="profile-select">Profile:</label>
-                        <select
-                            id="profile-select"
-                            className="profile-dropdown"
-                            value={selectedUsername}
-                            onChange={(e) => setSelectedUsername(e.target.value)}
-                        >
-                            {profiles.map(p => (
-                                <option key={p.username} value={p.username}>
-                                    {p.displayName}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Profile selector moved to App Header */}
                     <button className="add-appt-btn" onClick={() => setShowAddModal(true)}>+ New Appointment</button>
                 </div>
             </div>

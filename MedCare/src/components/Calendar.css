@@ -1,6 +1,10 @@
 .calendar-page {
     max-width: 1000px;
     margin: 0 auto;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 50px;
+    /* Add some padding at bottom */
 }
 
 .calendar-header {
