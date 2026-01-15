@@ -261,6 +261,75 @@
     cursor: pointer;
 }
 
+/* Layout Wrapper */
+.calendar-content-wrapper {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.calendar-main {
+    flex: 2;
+    min-width: 0;
+    /* Prevents flex item from overflowing */
+}
+
+/* Sidebar Styles */
+.calendar-sidebar {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    height: 100%;
+}
+
+.calendar-sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 18px;
+    border-bottom: 2px solid #f0f2f5;
+    padding-bottom: 10px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-date {
+    font-size: 12px;
+    color: #95a5a6;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.history-title {
+    font-weight: 600;
+    color: #34495e;
+    font-size: 14px;
+}
+
+.history-loc {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 2px;
+}
+
+/* Maintain existing button styles */
 .save-btn {
     background-color: #1abc9c;
     color: white;

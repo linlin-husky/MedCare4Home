@@ -169,8 +169,16 @@ function App() {
           <div className="user-info">
             {state.user && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span onClick={() => navigateTo('profile')} style={{ cursor: 'pointer' }}>
-                  Welcome, <b>{state.user.displayName}</b>
+                <span onClick={() => navigateTo('profile')} style={{ cursor: 'pointer', textAlign: 'right' }}>
+                  <div style={{ fontSize: '11px', color: '#888' }}>Logged in as {state.user.displayName}</div>
+                  {(() => {
+                    const currentProfile = profiles.find(p => p.username === selectedUsername);
+                    return currentProfile ? (
+                      <div style={{ fontSize: '14px' }}>Viewing: <b>{currentProfile.displayName}</b></div>
+                    ) : (
+                      <div style={{ fontSize: '14px' }}>Viewing: <b>{state.user.displayName}</b></div>
+                    );
+                  })()}
                 </span>
               </div>
             )}

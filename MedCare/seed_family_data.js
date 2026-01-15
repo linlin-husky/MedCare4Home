@@ -110,6 +110,56 @@ async function seedData() {
             });
         }
 
+        // 5. Generate Height Data (Stable for adults, growing for baby)
+        await Vitals.deleteMany({ username: { $in: allUsernames }, type: 'height' });
+        console.log('Cleared existing height data.');
+
+        // Linlin (165cm)
+        records.push({
+            id: crypto.randomUUID(),
+            username: username,
+            type: 'height',
+            value: 165,
+            unit: 'cm',
+            date: new Date()
+        });
+
+        // Grandma Fan (160cm)
+        records.push({
+            id: crypto.randomUUID(),
+            username: 'grandma_fan',
+            type: 'height',
+            value: 160,
+            unit: 'cm',
+            date: new Date()
+        });
+
+        // Peter (180cm)
+        records.push({
+            id: crypto.randomUUID(),
+            username: 'peter_husky',
+            type: 'height',
+            value: 180,
+            unit: 'cm',
+            date: new Date()
+        });
+
+        // Baby Linlin (Growing! 80cm -> 88cm)
+        for (let i = 0; i < 6; i++) {
+            const d = new Date(today);
+            d.setMonth(today.getMonth() - i);
+            // i=0 is today (88cm), i=5 is 6 months ago (80cm)
+            const h = 88 - (i * 1.5);
+            records.push({
+                id: crypto.randomUUID(),
+                username: 'baby_linlin',
+                type: 'height',
+                value: h,
+                unit: 'cm',
+                date: d
+            });
+        }
+
         await Vitals.insertMany(records);
         console.log(`✅ Seeded ${records.length} weight records for family.`);
 

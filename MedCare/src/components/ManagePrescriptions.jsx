@@ -36,6 +36,7 @@ function ManagePrescriptions({ user }) {
         route: 'Oral',
         dosage: '',
         frequency: '',
+        timesPerDay: 1,
         timing: '',
         schedule: { type: 'Daily', days: [], interval: 0 },
         startDate: new Date().toISOString().split('T')[0],
@@ -127,6 +128,7 @@ function ManagePrescriptions({ user }) {
             route: 'Oral',
             dosage: '',
             frequency: '',
+            timesPerDay: 1,
             timing: '',
             schedule: { type: 'Daily', days: [], interval: 0 },
             startDate: new Date().toISOString().split('T')[0],
@@ -158,6 +160,7 @@ function ManagePrescriptions({ user }) {
             route: prescription.route || 'Oral',
             dosage: prescription.dosage,
             frequency: prescription.frequency,
+            timesPerDay: prescription.timesPerDay || 1,
             timing: prescription.timing || '',
             schedule: sched,
             startDate: prescription.startDate ? new Date(prescription.startDate).toISOString().split('T')[0] : '',
@@ -404,7 +407,6 @@ function ManagePrescriptions({ user }) {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Frequency Type</label>
                                     <select value={scheduleType} onChange={(e) => setScheduleType(e.target.value)}>
                                         <option value="Daily">Daily</option>
                                         <option value="Weekly">Weekly (Specific Days)</option>
@@ -413,7 +415,21 @@ function ManagePrescriptions({ user }) {
                                         <option value="Custom">Custom Text</option>
                                     </select>
                                 </div>
+
+                                <div className="form-group">
+                                    <label>Times Per Day</label>
+                                    <input
+                                        type="number"
+                                        name="timesPerDay"
+                                        min="1"
+                                        value={formData.timesPerDay}
+                                        onChange={handleChange}
+                                        placeholder="e.g. 1"
+                                        style={{ width: '80px' }}
+                                    />
+                                </div>
                             </div>
+
 
                             {/* Dynamic Schedule Inputs */}
                             {scheduleType === 'Weekly' && (
@@ -505,7 +521,7 @@ function ManagePrescriptions({ user }) {
                                 <div className="form-group checkbox-group" style={{ marginTop: 0 }}>
                                     <label style={{ color: '#0046be', fontWeight: 'bold' }}>
                                         <input type="checkbox" name="refillReminder" checked={formData.refillReminder} onChange={handleRefillChange} />
-                                        Remind me to send refill request next week!
+                                        Remind me to send refill request to my doctor
                                     </label>
                                 </div>
                                 {formData.refillReminder && (
@@ -570,6 +586,7 @@ function ManagePrescriptions({ user }) {
                         </div>
                     ) : (
                         prescriptions.map(p => {
+                            console.log('Medication Data:', p); // DEBUG: Check if reminders/refillReminder are true
                             const derivedSched = getDerivedSchedule(p);
                             const freqText = p.frequency;
                             // Combine frequency and schedule (e.g. "1 pill" + "Daily" -> "1 pill Daily")
@@ -586,8 +603,9 @@ function ManagePrescriptions({ user }) {
                                                 <h3 className="med-name">
                                                     {p.medicationName || p.name} <span style={{ fontWeight: 'normal', color: '#555', marginLeft: '5px' }}>({p.route || 'Oral'}) {p.dosage}</span>
                                                     <span className="med-info-inline" style={{ marginLeft: '5px' }}>
-                                                        • {combinedFreq} {p.timing ? ` • ${p.timing}` : ''}
+                                                        • {combinedFreq} ({p.timesPerDay || 1}x/day) {p.timing ? ` • ${p.timing}` : ''}
                                                         {p.mealTiming && p.mealTiming !== 'No Restriction' && ` • ${p.mealTiming}`}
+                                                        {p.reminders && <span title="Daily Reminder Enabled"> • 🔔 Reminders On</span>}
                                                     </span>
                                                 </h3>
                                             </div>

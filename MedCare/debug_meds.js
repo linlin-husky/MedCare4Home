@@ -1,5 +1,5 @@
 
-const BASE_URL = 'http://localhost:3007';
+const BASE_URL = 'http://localhost:3000';
 
 async function run() {
     let cookie = '';
@@ -53,6 +53,13 @@ async function run() {
     });
     const getJson2 = await getRes2.json();
     console.log('Final Meds:', JSON.stringify(getJson2, null, 2));
+    // 4. Get Meds for linlin_husky
+    console.log('Fetching meds for linlin_husky...');
+    const getRes3 = await fetch(`${BASE_URL}/api/medications?username=linlin_husky`, {
+        headers: { 'Cookie': cookie }
+    });
+    const getJson3 = await getRes3.json();
+    console.log('Linlin Meds:', JSON.stringify(getJson3, null, 2));
 }
 
 run().catch(console.error);

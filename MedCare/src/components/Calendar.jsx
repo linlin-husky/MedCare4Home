@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as api from '../services/api.js';
 import './Calendar.css';
 
-function Calendar({ user, selectedUsername }) { // Receive selectedUsername prop
+function Calendar({ user, selectedUsername, setSelectedUsername, profiles }) { // Receive props for profile management
     const [date, setDate] = useState(new Date());
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -98,51 +98,93 @@ function Calendar({ user, selectedUsername }) { // Receive selectedUsername prop
         "July", "August", "September", "October", "November", "December"
     ];
 
+    // Filter appointments
+    const now = new Date();
+    const historyAppointments = appointments.filter(a => new Date(a.date) < now).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const upcomingAppointments = appointments.filter(a => new Date(a.date) >= now).sort((a, b) => new Date(a.date) - new Date(b.date));
+
     return (
         <div className="calendar-page">
             <div className="calendar-header">
                 <h1>Assignments & Appointments</h1>
                 <div className="header-actions">
-                    {/* Profile selector moved to App Header */}
+                    <div className="profile-selector">
+                        <label htmlFor="calendar-profile-select">Profile:</label>
+                        <select
+                            id="calendar-profile-select"
+                            className="profile-dropdown"
+                            value={selectedUsername || ''}
+                            onChange={(e) => setSelectedUsername && setSelectedUsername(e.target.value)}
+                        >
+                            {profiles && profiles.map(p => (
+                                <option key={p.username} value={p.username}>
+                                    {p.displayName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <button className="add-appt-btn" onClick={() => setShowAddModal(true)}>+ New Appointment</button>
                 </div>
             </div>
 
-            <div className="calendar-container">
-                <div className="calendar-nav">
-                    <button onClick={() => setDate(new Date(date.setMonth(date.getMonth() - 1)))}>&lt;</button>
-                    <h2>{monthNames[date.getMonth()]} {date.getFullYear()}</h2>
-                    <button onClick={() => setDate(new Date(date.setMonth(date.getMonth() + 1)))}>&gt;</button>
-                </div>
+            <div className="calendar-content-wrapper">
+                <div className="calendar-main">
+                    <div className="calendar-container">
+                        <div className="calendar-nav">
+                            <button onClick={() => setDate(new Date(date.setMonth(date.getMonth() - 1)))}>&lt;</button>
+                            <h2>{monthNames[date.getMonth()]} {date.getFullYear()}</h2>
+                            <button onClick={() => setDate(new Date(date.setMonth(date.getMonth() + 1)))}>&gt;</button>
+                        </div>
 
-                <div className="calendar-grid-header">
-                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                </div>
+                        <div className="calendar-grid-header">
+                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        </div>
 
-                <div className="calendar-grid">
-                    {renderCalendarGrid()}
-                </div>
-            </div>
-
-            <div className="appointments-list-view">
-                <h3>Upcoming</h3>
-                {loading ? <p>Loading...</p> : (
-                    <div className="appt-list">
-                        {appointments.map(appt => (
-                            <div key={appt.id} className="appt-item">
-                                <div className="appt-time">
-                                    {new Date(appt.date).toLocaleDateString()} <br />
-                                    {new Date(appt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </div>
-                                <div className="appt-info">
-                                    <div className="appt-title-list">{appt.title}</div>
-                                    <div className="appt-loc-list">{appt.location || 'No location'}</div>
-                                </div>
-                            </div>
-                        ))}
-                        {appointments.length === 0 && <p className="no-data">No appointments scheduled.</p>}
+                        <div className="calendar-grid">
+                            {renderCalendarGrid()}
+                        </div>
                     </div>
-                )}
+
+                    <div className="appointments-list-view">
+                        <h3>Upcoming</h3>
+                        {loading ? <p>Loading...</p> : (
+                            <div className="appt-list">
+                                {upcomingAppointments.map(appt => (
+                                    <div key={appt.id} className="appt-item">
+                                        <div className="appt-time">
+                                            {new Date(appt.date).toLocaleDateString()} <br />
+                                            {new Date(appt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                        <div className="appt-info">
+                                            <div className="appt-title-list">{appt.title}</div>
+                                            <div className="appt-loc-list">{appt.location || 'No location'}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {upcomingAppointments.length === 0 && <p className="no-data">No upcoming appointments.</p>}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="calendar-sidebar">
+                    <h3>Appointment History</h3>
+                    <div className="history-list">
+                        {historyAppointments.length === 0 ? (
+                            <p className="no-data">No history available.</p>
+                        ) : (
+                            historyAppointments.map(appt => (
+                                <div key={appt.id} className="history-item">
+                                    <div className="history-date">{new Date(appt.date).toLocaleDateString()}</div>
+                                    <div className="history-details">
+                                        <div className="history-title">{appt.title}</div>
+                                        <div className="history-loc">{appt.location}</div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
             </div>
 
             {showAddModal && (

@@ -82,27 +82,53 @@ function DashboardContent({ user, navigateTo, selectedUsername, setSelectedUsern
       try {
         // Fetch Profile for selected user
         if (selectedUsername) {
-          try {
-            if (selectedUsername === user.username) {
-              const profile = await api.getPublicProfile(selectedUsername);
-              setDisplayUser(profile.user || profile);
-            } else {
-              const profile = await api.getPublicProfile(selectedUsername);
-              setDisplayUser(profile.user || profile);
-            }
-          } catch (profileErr) {
-            console.warn(`Could not fetch profile for ${selectedUsername}, using fallback.`, profileErr);
-            // Fallback for family members who don't have a full User account
-            if (user && user.familyMembers) {
-              const member = user.familyMembers.find(m => m.username === selectedUsername);
-              if (member) {
-                setDisplayUser({
-                  displayName: member.name,
-                  username: member.username,
-                  relation: member.relation,
-                  // We don't have height/weight in familyMembers array, will default to '-'
-                });
+          console.log(`Switching dashboard view to: ${selectedUsername}`);
+
+          let foundLocally = false;
+          // 1. Check if it's a family member (local data)
+          if (user && user.familyMembers) {
+            let member = user.familyMembers.find(m => m.username === selectedUsername);
+
+            // Fallback: Check if selectedUsername is a virtual ID (virtual:parent:name)
+            if (!member && selectedUsername.startsWith('virtual:')) {
+              const parts = selectedUsername.split(':');
+              if (parts.length >= 3) {
+                const nameToFind = parts[2];
+                member = user.familyMembers.find(m => m.name === nameToFind);
               }
+            }
+
+            if (member) {
+              console.log('Found user in family members:', member);
+              setDisplayUser({
+                displayName: member.name,
+                username: member.username || selectedUsername, // Use selected if member has no username
+                relation: member.relation,
+                weight: member.weight || '-',
+                height: member.height || '-',
+                bmi: member.bmi || '-'
+              });
+              foundLocally = true;
+            }
+          }
+
+          // 2. If not found locally, try API (e.g. for the main user or other real users)
+          if (!foundLocally) {
+            try {
+              const profile = await api.getPublicProfile(selectedUsername);
+              console.log('Fetched profile from API:', profile);
+              // Ensure we don't accidentally show the logged-in user if the API ignores the param
+              const fetchedUser = profile.user || profile;
+              if (fetchedUser.username === selectedUsername) {
+                setDisplayUser(fetchedUser);
+              } else if (selectedUsername === user.username) {
+                // explicitly requesting self
+                setDisplayUser(fetchedUser);
+              } else {
+                console.warn('API returned matching user mismatch. Ignoring.');
+              }
+            } catch (profileErr) {
+              console.warn(`Could not fetch profile for ${selectedUsername}`, profileErr);
             }
           }
         }
@@ -578,15 +604,27 @@ function DashboardContent({ user, navigateTo, selectedUsername, setSelectedUsern
 
           <div className="profile-stats">
             <div className="p-stat">
-              <div className="p-val">{displayUser?.weight || '-'} lb</div>
+              <div className="p-val">
+                {displayUser?.weight && !isNaN(displayUser.weight)
+                  ? Number(displayUser.weight).toFixed(1)
+                  : (displayUser?.weight || '-')} lb
+              </div>
               <div className="p-lbl">Weight</div>
             </div>
             <div className="p-stat">
-              <div className="p-val">{displayUser?.height || '-'}</div>
+              <div className="p-val">
+                {displayUser?.height && !isNaN(displayUser.height)
+                  ? Number(displayUser.height).toFixed(1)
+                  : (displayUser?.height || '-')}
+              </div>
               <div className="p-lbl">Height</div>
             </div>
             <div className="p-stat">
-              <div className="p-val">{displayUser?.bmi || '-'}</div>
+              <div className="p-val">
+                {displayUser?.bmi && !isNaN(displayUser.bmi)
+                  ? Number(displayUser.bmi).toFixed(1)
+                  : (displayUser?.bmi || '-')}
+              </div>
               <div className="p-lbl">BMI</div>
             </div>
           </div>
