@@ -137,13 +137,31 @@ function BodyMeasurement({ user }) {
         notes: ''
     });
 
+    const [selectedUsername, setSelectedUsername] = useState(user?.username);
+
+    useEffect(() => {
+        if (user?.username && !selectedUsername) {
+            setSelectedUsername(user.username);
+        }
+    }, [user]);
+    const profiles = useMemo(() => {
+        const list = [{ username: user?.username, displayName: 'Me' }];
+        if (user?.familyMembers) {
+            user.familyMembers.forEach(m => {
+                const username = m.username || `virtual:${user.username}:${m.name}`;
+                list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
+            });
+        }
+        return list;
+    }, [user]);
+
     useEffect(() => {
         fetchVitals();
-    }, []);
+    }, [selectedUsername]);
 
     const fetchVitals = () => {
         setLoading(true);
-        api.getVitals().then(data => {
+        api.getVitals(null, selectedUsername).then(data => {
             setVitals(data.vitals || data || []);
             setLoading(false);
         }).catch(err => {
@@ -239,7 +257,7 @@ function BodyMeasurement({ user }) {
         }
 
         try {
-            await api.addVital(payload);
+            await api.addVital({ ...payload, username: selectedUsername });
             setShowForm(false);
             setFormData({ ...formData, notes: '', value: '', systolic: '', diastolic: '' });
             fetchVitals();
@@ -257,9 +275,24 @@ function BodyMeasurement({ user }) {
         <div className="body-measurement">
             <div className="vitals-header">
                 <h1>Body Measurement & Vitals</h1>
-                <button className="add-btn" onClick={() => setShowForm(!showForm)}>
-                    <span style={{ fontSize: '1.25rem' }}>+</span> Add Record
-                </button>
+                <div className="header-actions">
+                    <div className="profile-selector">
+                        <label htmlFor="target-profile">Profile: </label>
+                        <select
+                            id="target-profile"
+                            value={selectedUsername}
+                            onChange={(e) => setSelectedUsername(e.target.value)}
+                            className="profile-dropdown"
+                        >
+                            {profiles.map(p => (
+                                <option key={p.username} value={p.username}>{p.displayName}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <button className="add-btn" onClick={() => setShowForm(!showForm)}>
+                        <span style={{ fontSize: '1.25rem' }}>+</span> Add Record
+                    </button>
+                </div>
             </div>
 
             {/* --- Section 1: Fixed Stats (Weight, Height, BMI) --- */}

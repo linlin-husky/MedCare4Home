@@ -4,7 +4,7 @@ import express from 'express';
 
 function createMedicationRoutes(models) {
     const router = express.Router();
-    const { medications, sessions } = models;
+    const { medications, sessions, users } = models;
 
     const requireAuth = async (req, res, next) => {
         const sid = req.cookies.sid;
@@ -22,7 +22,21 @@ function createMedicationRoutes(models) {
     // GET all medications
     router.get('/', requireAuth, async (req, res) => {
         try {
-            const meds = await medications.getMedications(req.username);
+            const targetUser = req.query.username || req.username;
+
+            // Authorization check
+            if (targetUser.toLowerCase() !== req.username.toLowerCase()) {
+                const isVirtualForMe = targetUser.toLowerCase().startsWith(`virtual:${req.username.toLowerCase()}:`);
+                if (!isVirtualForMe) {
+                    const requester = await users.getUser(req.username);
+                    const isFamily = requester.familyMembers?.some(m => m.username?.toLowerCase() === targetUser.toLowerCase());
+                    if (!isFamily) {
+                        return res.status(403).json({ error: 'forbidden', message: 'You do not have access to this user\'s data' });
+                    }
+                }
+            }
+
+            const meds = await medications.getMedications(targetUser);
             res.json({ medications: meds });
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -36,12 +50,27 @@ function createMedicationRoutes(models) {
             if (!data.name && !data.medicationName) {
                 return res.status(400).json({ error: 'required-fields', message: 'Medication name is required' });
             }
+
+            const targetUser = data.username || req.username;
+
+            // Authorization check
+            if (targetUser.toLowerCase() !== req.username.toLowerCase()) {
+                const isVirtualForMe = targetUser.toLowerCase().startsWith(`virtual:${req.username.toLowerCase()}:`);
+                if (!isVirtualForMe) {
+                    const requester = await users.getUser(req.username);
+                    const isFamily = requester.familyMembers?.some(m => m.username?.toLowerCase() === targetUser.toLowerCase());
+                    if (!isFamily) {
+                        return res.status(403).json({ error: 'forbidden', message: 'You do not have access to this user\'s data' });
+                    }
+                }
+            }
+
             // Support both 'name' and 'medicationName' fields
             const medData = {
                 ...data,
                 name: data.medicationName || data.name
             };
-            const med = await medications.addMedication(req.username, medData);
+            const med = await medications.addMedication(targetUser, medData);
             res.status(201).json({ medication: med });
         } catch (err) {
             res.status(400).json({ error: err.message });

@@ -17,14 +17,33 @@ function ReportSymptoms({ user }) {
         relatedMedications: []
     });
 
+    const [selectedUsername, setSelectedUsername] = useState(user?.username);
+
+    useEffect(() => {
+        if (user?.username && !selectedUsername) {
+            setSelectedUsername(user.username);
+        }
+    }, [user, selectedUsername]);
+
+    const profiles = React.useMemo(() => {
+        const list = [{ username: user?.username, displayName: 'Me' }];
+        if (user?.familyMembers) {
+            user.familyMembers.forEach(m => {
+                const username = m.username || `virtual:${user.username}:${m.name}`;
+                list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
+            });
+        }
+        return list;
+    }, [user]);
+
     useEffect(() => {
         fetchSymptoms();
-    }, []);
+    }, [selectedUsername]);
 
     async function fetchSymptoms() {
         try {
             setLoading(true);
-            const data = await api.getSymptoms();
+            const data = await api.getSymptoms(selectedUsername);
             // Handle both { symptoms: [] } and [] response formats
             setSymptoms(data.symptoms || data || []);
             setError(null);
@@ -40,7 +59,8 @@ function ReportSymptoms({ user }) {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            await api.createSymptom(formData);
+            const submitData = { ...formData, username: selectedUsername };
+            await api.createSymptom(submitData);
             setFormData({
                 symptomName: '',
                 severity: 'mild',
@@ -81,9 +101,26 @@ function ReportSymptoms({ user }) {
         <div className="report-symptoms">
             <div className="symptoms-header">
                 <h1>Report Symptoms</h1>
-                <button className="add-btn" onClick={() => setShowForm(!showForm)}>
-                    + Report Symptom
-                </button>
+                <div className="header-actions">
+                    <div className="profile-selector">
+                        <label htmlFor="profile-select">Profile:</label>
+                        <select
+                            id="profile-select"
+                            className="profile-dropdown"
+                            value={selectedUsername}
+                            onChange={(e) => setSelectedUsername(e.target.value)}
+                        >
+                            {profiles.map(p => (
+                                <option key={p.username} value={p.username}>
+                                    {p.displayName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button className="add-btn" onClick={() => setShowForm(!showForm)}>
+                        + Report Symptom
+                    </button>
+                </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}

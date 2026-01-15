@@ -30,7 +30,8 @@ const userSchema = new mongoose.Schema({
   familyMembers: [{
     name: { type: String },
     relation: { type: String },
-    age: { type: Number }
+    age: { type: Number },
+    username: { type: String } // Optional: Link to an existing user account
   }]
 });
 

@@ -60,9 +60,9 @@ function ProfileEdit({ state, dispatch, navigateTo }) {
     api.updateUserProfile(formData)
       .then(data => {
         setProfile(prev => ({ ...prev, ...data }));
+        dispatch({ type: ACTIONS.UPDATE_USER, payload: data });
         setIsEditing(false);
         dispatch({ type: ACTIONS.SET_SUCCESS, payload: 'Profile updated!' });
-        dispatch({ type: ACTIONS.SET_LOADING, payload: false });
       })
       .catch(err => {
         dispatch({ type: ACTIONS.SET_ERROR, payload: err.message || 'Failed to update profile' });
@@ -113,9 +113,31 @@ function ProfileEdit({ state, dispatch, navigateTo }) {
           <div className="trust-stats">
             {profile.familyMembers && profile.familyMembers.length > 0 ? (
               profile.familyMembers.map((member, index) => (
-                <div key={index} className="stat">
+                <div key={index} className="stat" style={{ position: 'relative' }}>
                   <span className="stat-value">{member.relation}</span>
-                  <span className="stat-label">{member.name}</span>
+                  <span className="stat-label">
+                    {member.name} {member.username && `(@${member.username})`}
+                    {isEditing && (
+                      <button
+                        className="delete-member-btn"
+                        onClick={() => {
+                          if (confirm(`Remove ${member.name}?`)) {
+                            const updatedMembers = profile.familyMembers.filter((_, i) => i !== index);
+                            api.updateUserProfile({ familyMembers: updatedMembers }).then(data => {
+                              setProfile(prev => ({ ...prev, ...data }));
+                              dispatch({ type: ACTIONS.UPDATE_USER, payload: data });
+                            }).catch(err => {
+                              dispatch({ type: ACTIONS.SET_ERROR, payload: 'Failed to remove member: ' + (err.message || 'Unknown error') });
+                            });
+                          }
+                        }}
+                        style={{ border: 'none', background: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}
+                        title="Remove member"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
                 </div>
               ))
             ) : (
@@ -128,7 +150,7 @@ function ProfileEdit({ state, dispatch, navigateTo }) {
             {isEditing && (
               <div className="add-family-member-container" style={{ gridColumn: '1 / -1', marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
                 <h4 style={{ margin: '0 0 10px', fontSize: '0.875rem', color: '#666' }}>Add Family Member</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px', alignItems: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '10px', alignItems: 'center' }}>
                   <input
                     type="text"
                     placeholder="Name"
@@ -148,6 +170,13 @@ function ProfileEdit({ state, dispatch, navigateTo }) {
                     <option value="Spouse">Spouse</option>
                     <option value="Partner">Partner</option>
                   </select>
+                  <input
+                    type="text"
+                    placeholder="Linked Username (Optional)"
+                    id="new-member-username"
+                    className="form-input"
+                    style={{ padding: '8px', fontSize: '0.875rem' }}
+                  />
                   <button
                     type="button"
                     className="edit-button"
@@ -155,22 +184,26 @@ function ProfileEdit({ state, dispatch, navigateTo }) {
                     onClick={() => {
                       const nameEl = document.getElementById('new-member-name');
                       const relEl = document.getElementById('new-member-relation');
+                      const userEl = document.getElementById('new-member-username');
                       const name = nameEl.value.trim();
                       const relation = relEl.value.trim();
+                      const username = userEl.value.trim().toLowerCase();
 
                       if (!name || !relation) {
                         return dispatch({ type: ACTIONS.SET_ERROR, payload: 'Please enter name and relation' });
                       }
 
-                      const newMember = { name, relation, age: 0 };
+                      const newMember = { name, relation, age: 0, username };
                       const updatedMembers = [...(profile.familyMembers || []), newMember];
 
                       console.log('Frontend: Sending update', updatedMembers);
                       api.updateUserProfile({ familyMembers: updatedMembers }).then(data => {
                         console.log('Frontend: Update success', data);
                         setProfile(prev => ({ ...prev, ...data }));
+                        dispatch({ type: ACTIONS.UPDATE_USER, payload: data });
                         nameEl.value = '';
                         relEl.value = '';
+                        userEl.value = '';
                       }).catch(err => {
                         console.error('Frontend: Update failed', err);
                         dispatch({ type: ACTIONS.SET_ERROR, payload: 'Failed to add member: ' + (err.message || 'Unknown error') });

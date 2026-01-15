@@ -10,6 +10,24 @@ function ManagePrescriptions({ user }) {
     const [error, setError] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [selectedUsername, setSelectedUsername] = useState(user?.username);
+
+    useEffect(() => {
+        if (user?.username && !selectedUsername) {
+            setSelectedUsername(user.username);
+        }
+    }, [user]);
+
+    const profiles = React.useMemo(() => {
+        const list = [{ username: user?.username, displayName: 'Me' }];
+        if (user?.familyMembers) {
+            user.familyMembers.forEach(m => {
+                const username = m.username || `virtual:${user.username}:${m.name}`;
+                list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
+            });
+        }
+        return list;
+    }, [user]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -42,7 +60,7 @@ function ManagePrescriptions({ user }) {
 
     useEffect(() => {
         fetchPrescriptions();
-    }, []);
+    }, [selectedUsername]);
 
     // Auto-update frequency string when schedule changes
     useEffect(() => {
@@ -75,7 +93,7 @@ function ManagePrescriptions({ user }) {
     async function fetchPrescriptions() {
         try {
             setLoading(true);
-            const data = await api.getPrescriptions();
+            const data = await api.getPrescriptions(selectedUsername);
             setPrescriptions(data.medications || data || []);
             setError(null);
         } catch (err) {
@@ -89,10 +107,11 @@ function ManagePrescriptions({ user }) {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
+            const submitData = { ...formData, username: selectedUsername };
             if (editingId) {
-                await api.updatePrescription(editingId, formData);
+                await api.updatePrescription(editingId, submitData);
             } else {
-                await api.createPrescription(formData);
+                await api.createPrescription(submitData);
             }
             resetForm();
             fetchPrescriptions();
@@ -293,12 +312,29 @@ function ManagePrescriptions({ user }) {
         <div className="manage-prescriptions">
             <div className="prescriptions-header">
                 <h1>Medications</h1>
-                <button className="print-btn" title="Print">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                        <path d="M6 14h12v8H6z" />
-                    </svg>
-                </button>
+                <div className="header-actions">
+                    <div className="profile-selector">
+                        <label htmlFor="profile-select">Profile:</label>
+                        <select
+                            id="profile-select"
+                            className="profile-dropdown"
+                            value={selectedUsername}
+                            onChange={(e) => setSelectedUsername(e.target.value)}
+                        >
+                            {profiles.map(p => (
+                                <option key={p.username} value={p.username}>
+                                    {p.displayName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button className="print-btn" title="Print">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+                            <path d="M6 14h12v8H6z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div className="medications-content">

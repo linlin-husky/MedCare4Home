@@ -59,14 +59,16 @@ function updateUserProfile(data) {
 }
 
 // ============ APPOINTMENTS ============
-function getAppointments() {
-  return fetch('/api/appointments', {
+function getAppointments(username) {
+  const url = username ? `/api/appointments?username=${encodeURIComponent(username)}` : '/api/appointments';
+  return fetch(url, {
     method: 'GET',
     credentials: 'include'
   }).then(handleResponse);
 }
 
 function createAppointment(apptData) {
+  // apptData can include 'username'
   return fetch('/api/appointments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -76,13 +78,15 @@ function createAppointment(apptData) {
 }
 
 // ============ MEDICAL TESTS ============
-function getMedicalTests() {
-  return fetch('/api/medical-tests', {
+function getMedicalTests(username) {
+  const url = username ? `/api/medical-tests?username=${encodeURIComponent(username)}` : '/api/medical-tests';
+  return fetch(url, {
     credentials: 'include'
   }).then(handleResponse);
 }
 
 function addMedicalTest(testData) {
+  // If testData already contains username, it will be sent in body
   return fetch('/api/medical-tests', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -126,8 +130,9 @@ function searchMedicalTests(query) {
 }
 
 // ============ MEDICATIONS/PRESCRIPTIONS ============
-function getMedications() {
-  return fetch('/api/medications', {
+function getMedications(username) {
+  const url = username ? `/api/medications?username=${encodeURIComponent(username)}` : '/api/medications';
+  return fetch(url, {
     credentials: 'include'
   }).then(handleResponse);
 }
@@ -158,8 +163,9 @@ function deleteMedication(id) {
 }
 
 // ============ PRESCRIPTIONS ============
-function getPrescriptions() {
-  return fetch('/api/medications', {
+function getPrescriptions(username) {
+  const url = username ? `/api/medications?username=${encodeURIComponent(username)}` : '/api/medications';
+  return fetch(url, {
     credentials: 'include'
   }).then(handleResponse);
 }
@@ -190,8 +196,9 @@ function deletePrescription(id) {
 }
 
 // ============ SYMPTOMS ============
-function getSymptoms() {
-  return fetch('/api/symptoms', {
+function getSymptoms(username) {
+  const url = username ? `/api/symptoms?username=${encodeURIComponent(username)}` : '/api/symptoms';
+  return fetch(url, {
     credentials: 'include'
   }).then(handleResponse);
 }
@@ -213,14 +220,22 @@ function deleteSymptom(id) {
 }
 
 // ============ VITALS ============
-function getVitals(type) {
-  const url = type ? `/api/vitals?type=${encodeURIComponent(type)}` : '/api/vitals';
+function getVitals(type, username) {
+  let url = '/api/vitals';
+  const params = new URLSearchParams();
+  if (type) params.append('type', type);
+  if (username) params.append('username', username);
+
+  const queryString = params.toString();
+  if (queryString) url += `?${queryString}`;
+
   return fetch(url, {
     credentials: 'include'
   }).then(handleResponse);
 }
 
 function addVital(data) {
+  // data can include 'username' for dependents
   return fetch('/api/vitals', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

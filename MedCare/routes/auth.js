@@ -36,7 +36,8 @@ function createAuthController(models) {
       username: result.user.username,
       displayName: result.user.displayName,
       email: result.user.email,
-      phone: result.user.phone
+      phone: result.user.phone,
+      familyMembers: result.user.familyMembers || []
     });
   };
 
@@ -65,6 +66,7 @@ function createAuthController(models) {
       email: user.email,
       phone: user.phone,
       trustScore: user.trustScore,
+      familyMembers: user.familyMembers || [],
       isAdmin: users.isAdmin(username)
     });
   };
@@ -100,6 +102,7 @@ function createAuthController(models) {
       email: userData.email,
       phone: userData.phone,
       trustScore: userData.trustScore,
+      familyMembers: userData.familyMembers || [],
       isAdmin: users.isAdmin(username)
     });
   };

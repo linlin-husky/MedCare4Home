@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import './MedicalTests.css';
 import ErrorMessage from './ErrorMessage';
 import SuccessMessage from './SuccessMessage';
@@ -20,7 +20,25 @@ const TEST_STATUSES = [
     'pending'
 ];
 
-export default function MedicalTests() {
+export default function MedicalTests({ user }) {
+    const [selectedUsername, setSelectedUsername] = useState(user?.username);
+
+    useEffect(() => {
+        if (user?.username && !selectedUsername) {
+            setSelectedUsername(user.username);
+        }
+    }, [user, selectedUsername]);
+    const profiles = useMemo(() => {
+        const list = [{ username: user?.username, displayName: 'Me' }];
+        if (user?.familyMembers) {
+            user.familyMembers.forEach(m => {
+                const username = m.username || `virtual:${user.username}:${m.name}`;
+                list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
+            });
+        }
+        return list;
+    }, [user]);
+
     const [tests, setTests] = useState([]);
     const [filteredTests, setFilteredTests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,7 +65,7 @@ export default function MedicalTests() {
     // Fetch all tests
     useEffect(() => {
         fetchTests();
-    }, []);
+    }, [selectedUsername]);
 
     // Apply filters when tests or filters change
     useEffect(() => {
@@ -57,7 +75,10 @@ export default function MedicalTests() {
     const fetchTests = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/medical-tests', {
+            const url = selectedUsername
+                ? `/api/medical-tests?username=${encodeURIComponent(selectedUsername)}`
+                : '/api/medical-tests';
+            const response = await fetch(url, {
                 credentials: 'include'
             });
 
@@ -122,7 +143,7 @@ export default function MedicalTests() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ ...formData, username: selectedUsername })
             });
 
             if (!response.ok) {
@@ -186,13 +207,28 @@ export default function MedicalTests() {
         <div className="medical-tests-container">
             <div className="page-header">
                 <h1>Test Results</h1>
-                <button
-                    className="add-test-btn"
-                    onClick={() => setShowForm(!showForm)}
-                    title="Add new test record"
-                >
-                    +
-                </button>
+                <div className="header-actions">
+                    <div className="profile-selector">
+                        <label htmlFor="target-profile">Profile: </label>
+                        <select
+                            id="target-profile"
+                            value={selectedUsername}
+                            onChange={(e) => setSelectedUsername(e.target.value)}
+                            className="profile-dropdown"
+                        >
+                            {profiles.map(p => (
+                                <option key={p.username} value={p.username}>{p.displayName}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        className="add-test-btn"
+                        onClick={() => setShowForm(!showForm)}
+                        title="Add new test record"
+                    >
+                        +
+                    </button>
+                </div>
             </div>
 
             {/* Expandable Note */}

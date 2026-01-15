@@ -4,7 +4,7 @@ import express from 'express';
 
 function createVitalsRoutes(models) {
     const router = express.Router();
-    const { vitals, sessions } = models;
+    const { vitals, sessions, users } = models;
 
     const requireAuth = async (req, res, next) => {
         const sid = req.cookies.sid;
@@ -22,7 +22,21 @@ function createVitalsRoutes(models) {
     // GET all vitals
     router.get('/', requireAuth, async (req, res) => {
         try {
-            const vitalsList = await vitals.getVitals(req.username, req.query.type);
+            const targetUser = req.query.username || req.username;
+
+            // Authorization check
+            if (targetUser.toLowerCase() !== req.username.toLowerCase()) {
+                const isVirtualForMe = targetUser.toLowerCase().startsWith(`virtual:${req.username.toLowerCase()}:`);
+                if (!isVirtualForMe) {
+                    const requester = await users.getUser(req.username);
+                    const isFamily = requester.familyMembers?.some(m => m.username?.toLowerCase() === targetUser.toLowerCase());
+                    if (!isFamily) {
+                        return res.status(403).json({ error: 'forbidden', message: 'You do not have access to this user\'s data' });
+                    }
+                }
+            }
+
+            const vitalsList = await vitals.getVitals(targetUser, req.query.type);
             res.json({ vitals: vitalsList });
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -36,7 +50,22 @@ function createVitalsRoutes(models) {
             if (!data.type || !data.value) {
                 return res.status(400).json({ error: 'required-fields', message: 'Type and value are required' });
             }
-            const vital = await vitals.addVital(req.username, data);
+
+            const targetUser = data.username || req.username;
+
+            // Authorization check
+            if (targetUser.toLowerCase() !== req.username.toLowerCase()) {
+                const isVirtualForMe = targetUser.toLowerCase().startsWith(`virtual:${req.username.toLowerCase()}:`);
+                if (!isVirtualForMe) {
+                    const requester = await users.getUser(req.username);
+                    const isFamily = requester.familyMembers?.some(m => m.username?.toLowerCase() === targetUser.toLowerCase());
+                    if (!isFamily) {
+                        return res.status(403).json({ error: 'forbidden', message: 'You do not have access to this user\'s data' });
+                    }
+                }
+            }
+
+            const vital = await vitals.addVital(targetUser, data);
             res.status(201).json({ vital });
         } catch (err) {
             res.status(400).json({ error: err.message });

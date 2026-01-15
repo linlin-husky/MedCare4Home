@@ -4,7 +4,7 @@ import express from 'express';
 
 function createMedicalTestRoutes(models) {
     const router = express.Router();
-    const { medicalTests, sessions } = models;
+    const { medicalTests, sessions, users } = models;
 
     // Middleware to verify session
     async function verifySession(req, res, next) {
@@ -67,7 +67,21 @@ function createMedicalTestRoutes(models) {
     // Get all tests for current user
     router.get('/', verifySession, async (req, res) => {
         try {
-            const tests = await medicalTests.getTests(req.username);
+            const targetUser = req.query.username || req.username;
+
+            // Authorization check
+            if (targetUser.toLowerCase() !== req.username.toLowerCase()) {
+                const isVirtualForMe = targetUser.toLowerCase().startsWith(`virtual:${req.username.toLowerCase()}:`);
+                if (!isVirtualForMe) {
+                    const requester = await users.getUser(req.username);
+                    const isFamily = requester.familyMembers?.some(m => m.username?.toLowerCase() === targetUser.toLowerCase());
+                    if (!isFamily) {
+                        return res.status(403).json({ error: 'forbidden', message: 'You do not have access to this user\'s data' });
+                    }
+                }
+            }
+
+            const tests = await medicalTests.getTests(targetUser);
             res.json(tests);
         } catch (err) {
             console.error('Error fetching tests:', err);
@@ -84,7 +98,21 @@ function createMedicalTestRoutes(models) {
                 return res.status(400).json({ error: 'missing-required-fields' });
             }
 
-            const test = await medicalTests.addTest(req.username, {
+            const targetUser = req.body.username || req.username;
+
+            // Authorization check
+            if (targetUser.toLowerCase() !== req.username.toLowerCase()) {
+                const isVirtualForMe = targetUser.toLowerCase().startsWith(`virtual:${req.username.toLowerCase()}:`);
+                if (!isVirtualForMe) {
+                    const requester = await users.getUser(req.username);
+                    const isFamily = requester.familyMembers?.some(m => m.username?.toLowerCase() === targetUser.toLowerCase());
+                    if (!isFamily) {
+                        return res.status(403).json({ error: 'forbidden', message: 'You do not have access to this user\'s data' });
+                    }
+                }
+            }
+
+            const test = await medicalTests.addTest(targetUser, {
                 testName,
                 category,
                 status: status || 'pending',

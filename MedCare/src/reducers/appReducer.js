@@ -22,7 +22,8 @@ const ACTIONS = {
   SET_SELECTED_ITEM: 'SET_SELECTED_ITEM',
   SET_SELECTED_LENDING: 'SET_SELECTED_LENDING',
   SET_PUBLIC_ITEMS: 'SET_PUBLIC_ITEMS',
-  SET_SEARCH_RESULTS: 'SET_SEARCH_RESULTS'
+  SET_SEARCH_RESULTS: 'SET_SEARCH_RESULTS',
+  UPDATE_USER: 'UPDATE_USER'
 };
 
 const initialState = {
@@ -70,6 +71,13 @@ function appReducer(state, action) {
         currentPage: 'dashboard',
         isLoading: false,
         unreadCount: action.payload.unreadCount || 0
+      };
+
+    case ACTIONS.UPDATE_USER:
+      return {
+        ...state,
+        user: { ...state.user, ...action.payload },
+        isLoading: false
       };
 
     case ACTIONS.LOGOUT:

@@ -11,6 +11,25 @@ function Dashboard({ user, navigateTo }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  const [selectedUsername, setSelectedUsername] = useState(user?.username);
+
+  useEffect(() => {
+    if (user?.username && !selectedUsername) {
+      setSelectedUsername(user.username);
+    }
+  }, [user, selectedUsername]);
+
+  const profiles = React.useMemo(() => {
+    const list = [{ username: user?.username, displayName: 'Me' }];
+    if (user?.familyMembers) {
+      user.familyMembers.forEach(m => {
+        const username = m.username || `virtual:${user.username}:${m.name}`;
+        list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
+      });
+    }
+    return list;
+  }, [user]);
+
   // Calculate current week's days (Mon-Sun)
   const getWeekDays = () => {
     const today = new Date();
@@ -40,31 +59,36 @@ function Dashboard({ user, navigateTo }) {
     // Fetch initial data
     const fetchData = async () => {
       try {
-        const appts = await api.getAppointments();
+        const appts = await api.getAppointments(selectedUsername);
         if (appts && Array.isArray(appts.appointments)) {
           setAppointments(appts.appointments);
         } else if (Array.isArray(appts)) {
           setAppointments(appts);
         }
 
-        const meds = await api.getMedications();
+        const meds = await api.getMedications(selectedUsername);
         if (meds && Array.isArray(meds.medications)) {
           setMedications(meds.medications);
         } else if (Array.isArray(meds)) {
           setMedications(meds);
         }
 
-        const vitals = await api.getVitals('weight');
+        const vitals = await api.getVitals('weight', selectedUsername);
         const vList = vitals && (vitals.vitals || vitals);
         if (Array.isArray(vList)) {
           const weights = vList.map(v => v.value);
           if (weights.length > 0) setWeightData(weights);
+          else setWeightData([]);
+        } else {
+          setWeightData([]);
         }
 
-        const tests = await api.getMedicalTests();
+        const tests = await api.getMedicalTests(selectedUsername);
         const tList = tests && (tests.tests || tests);
         if (Array.isArray(tList)) {
           setMedicalTests(tList);
+        } else {
+          setMedicalTests([]);
         }
 
       } catch (err) {
@@ -72,7 +96,7 @@ function Dashboard({ user, navigateTo }) {
       }
     };
     fetchData();
-  }, [user]); // Re-fetch if user changes (e.g. login)
+  }, [user, selectedUsername]); // Re-fetch if user or selectedUsername changes
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newAppt, setNewAppt] = useState({
@@ -89,13 +113,14 @@ function Dashboard({ user, navigateTo }) {
     api.createAppointment({
       title: newAppt.title,
       location: newAppt.location,
-      date: dateTime
+      date: dateTime,
+      username: selectedUsername
     })
       .then(() => {
         setShowAddModal(false);
         setNewAppt({ title: '', time: '', location: '', date: new Date().toISOString().split('T')[0] });
         // Refresh appointments
-        api.getAppointments()
+        api.getAppointments(selectedUsername)
           .then(data => setAppointments(data.appointments || []))
           .catch(err => console.error('Failed to load appointments', err));
       })
@@ -107,6 +132,24 @@ function Dashboard({ user, navigateTo }) {
 
   return (
     <div className="dashboard-container">
+      <div className="dashboard-header-row">
+
+        <div className="profile-selector">
+          <label htmlFor="profile-select">Profile:</label>
+          <select
+            id="profile-select"
+            className="profile-dropdown"
+            value={selectedUsername}
+            onChange={(e) => setSelectedUsername(e.target.value)}
+          >
+            {profiles.map(p => (
+              <option key={p.username} value={p.username}>
+                {p.displayName}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {/* Top Row */}
       <div className="dashboard-row">
@@ -307,9 +350,7 @@ function Dashboard({ user, navigateTo }) {
       </div>
 
       {/* Motivational Quote */}
-      <div className="motivational-quote">
-        "You’re allowed to rest, and you’re allowed to hope."
-      </div>
+
 
       {showAddModal && (
         <div className="modal-overlay">

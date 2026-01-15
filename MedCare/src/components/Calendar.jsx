@@ -14,13 +14,32 @@ function Calendar({ user }) {
         date: new Date().toISOString().split('T')[0]
     });
 
+    const [selectedUsername, setSelectedUsername] = useState(user?.username);
+
+    useEffect(() => {
+        if (user?.username && !selectedUsername) {
+            setSelectedUsername(user.username);
+        }
+    }, [user, selectedUsername]);
+
+    const profiles = React.useMemo(() => {
+        const list = [{ username: user?.username, displayName: 'Me' }];
+        if (user?.familyMembers) {
+            user.familyMembers.forEach(m => {
+                const username = m.username || `virtual:${user.username}:${m.name}`;
+                list.push({ username: username, displayName: `${m.name} (${m.relation})${!m.username ? ' (Local)' : ''}` });
+            });
+        }
+        return list;
+    }, [user]);
+
     useEffect(() => {
         loadAppointments();
-    }, [user]);
+    }, [user, selectedUsername]);
 
     function loadAppointments() {
         // For MVP, we fetch all appointments. Real app would fetch by month/range.
-        api.getAppointments()
+        api.getAppointments(selectedUsername)
             .then(data => {
                 setAppointments(data.appointments || []);
                 setLoading(false);
@@ -39,7 +58,8 @@ function Calendar({ user }) {
         api.createAppointment({
             title: newAppt.title,
             location: newAppt.location,
-            date: dateTime
+            date: dateTime,
+            username: selectedUsername
         })
             .then(() => {
                 setShowAddModal(false);
@@ -101,7 +121,24 @@ function Calendar({ user }) {
         <div className="calendar-page">
             <div className="calendar-header">
                 <h1>Assignments & Appointments</h1>
-                <button className="add-appt-btn" onClick={() => setShowAddModal(true)}>+ New Appointment</button>
+                <div className="header-actions">
+                    <div className="profile-selector">
+                        <label htmlFor="profile-select">Profile:</label>
+                        <select
+                            id="profile-select"
+                            className="profile-dropdown"
+                            value={selectedUsername}
+                            onChange={(e) => setSelectedUsername(e.target.value)}
+                        >
+                            {profiles.map(p => (
+                                <option key={p.username} value={p.username}>
+                                    {p.displayName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button className="add-appt-btn" onClick={() => setShowAddModal(true)}>+ New Appointment</button>
+                </div>
             </div>
 
             <div className="calendar-container">
