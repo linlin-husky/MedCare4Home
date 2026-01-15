@@ -13,6 +13,7 @@ import MedicalTests from './components/MedicalTests.jsx';
 import ManagePrescriptions from './components/ManagePrescriptions.jsx';
 import ReportSymptoms from './components/ReportSymptoms.jsx';
 import BodyMeasurement from './components/BodyMeasurement.jsx';
+import PulseMonitoring from './components/PulseMonitoring.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import ErrorMessage from './components/ErrorMessage.jsx';
 import SuccessMessage from './components/SuccessMessage.jsx';
@@ -29,11 +30,12 @@ const PAGE_COMPONENTS = {
   'manage-prescriptions': ManagePrescriptions,
   'report-symptoms': ReportSymptoms,
   'body-measurement': BodyMeasurement,
+  'pulse-monitoring': PulseMonitoring,
   'profile': ProfileEdit,
   'directory': UserDirectory
 };
 
-const PROTECTED_PAGES = ['dashboard', 'calendar', 'tests', 'manage-prescriptions', 'report-symptoms', 'body-measurement', 'profile', 'directory'];
+const PROTECTED_PAGES = ['dashboard', 'calendar', 'tests', 'manage-prescriptions', 'report-symptoms', 'body-measurement', 'pulse-monitoring', 'profile', 'directory'];
 
 // ============ MAIN COMPONENT ============
 function App() {

@@ -121,15 +121,47 @@ function DashboardContent({ user, navigateTo, selectedUsername, setSelectedUsern
           setMedications(meds);
         }
 
-        const vitals = await api.getVitals('weight', selectedUsername);
-        const vList = vitals && (vitals.vitals || vitals);
-        if (Array.isArray(vList)) {
-          const weights = vList.map(v => v.value);
-          if (weights.length > 0) setWeightData(weights);
-          else setWeightData([]);
+        // Fetch Weight
+        const wVitals = await api.getVitals('weight', selectedUsername);
+        const wList = wVitals && (wVitals.vitals || wVitals);
+        let latestWeightVal = null;
+        if (Array.isArray(wList) && wList.length > 0) {
+          // Sort by date descending
+          const sortedW = wList.sort((a, b) => new Date(b.date) - new Date(a.date));
+          setWeightData(sortedW.map(v => v.value).reverse()); // For chart (oldest first)
+          latestWeightVal = sortedW[0].value;
         } else {
           setWeightData([]);
         }
+
+        // Fetch Height
+        const hVitals = await api.getVitals('height', selectedUsername);
+        const hList = hVitals && (hVitals.vitals || hVitals);
+        let latestHeightVal = null;
+        if (Array.isArray(hList) && hList.length > 0) {
+          const sortedH = hList.sort((a, b) => new Date(b.date) - new Date(a.date));
+          latestHeightVal = sortedH[0].value;
+        }
+
+        // Calculate BMI
+        let calculatedBMI = '-';
+        if (latestWeightVal && latestHeightVal) {
+          // Assuming weight in lbs and height in cm (based on seed)
+          // BMI = (lb / 2.20462) / ((cm / 100) ^ 2)
+          const weightKg = latestWeightVal / 2.20462;
+          const heightM = latestHeightVal / 100;
+          if (heightM > 0) {
+            calculatedBMI = (weightKg / (heightM * heightM)).toFixed(1);
+          }
+        }
+
+        // Update display user with latest metrics if available, or keep existing
+        setDisplayUser(prev => ({
+          ...prev,
+          weight: latestWeightVal || prev.weight,
+          height: latestHeightVal || prev.height,
+          bmi: calculatedBMI !== '-' ? calculatedBMI : prev.bmi
+        }));
 
         const tests = await api.getMedicalTests(selectedUsername);
         const tList = tests && (tests.tests || tests);

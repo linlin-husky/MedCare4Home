@@ -27,7 +27,7 @@ function Sidebar({ currentPage, navigateTo }) {
         {
             title: 'HEALTH MONITOR',
             items: [
-                { id: 'pulse', label: 'Pulse Monitor', icon: 'heart', badge: 'Upcoming' },
+                { id: 'pulse-monitoring', label: 'Pulse Monitor', icon: 'heart' },
                 { id: 'visualization', label: 'Visualization', icon: 'pie-chart', badge: 'Upcoming' }
             ],
         },

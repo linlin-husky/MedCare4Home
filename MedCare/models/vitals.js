@@ -12,6 +12,15 @@ const vitalsSchema = new mongoose.Schema({
     systolic: { type: Number },
     diastolic: { type: Number },
     pulse: { type: Number },
+    // Pulse specific metadata
+    regularity: {
+        type: String,
+        enum: ['regular', 'irregular', 'afib']
+    },
+    strength: {
+        type: String,
+        enum: ['strong', 'normal', 'weak']
+    },
     unit: { type: String },
     date: { type: Date, default: Date.now },
     notes: { type: String }

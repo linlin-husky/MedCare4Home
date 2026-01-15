@@ -130,7 +130,9 @@ export default function MedicalTests({ user }) {
     const [isNoteExpanded, setIsNoteExpanded] = useState(false);
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 
-    const handleAddTest = async (e) => {
+    const [editingId, setEditingId] = useState(null);
+
+    const handleSaveTest = async (e) => {
         e.preventDefault();
 
         if (!formData.testName || !formData.category) {
@@ -139,19 +141,39 @@ export default function MedicalTests({ user }) {
         }
 
         try {
-            const response = await fetch('/api/medical-tests', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ ...formData, username: selectedUsername })
-            });
+            const payload = { ...formData, username: selectedUsername };
+            let response;
 
-            if (!response.ok) {
-                throw new Error('Failed to add test');
+            if (editingId) {
+                response = await fetch(`/api/medical-tests/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                response = await fetch('/api/medical-tests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
             }
 
-            const newTest = await response.json();
-            setTests([...tests, newTest]);
+            if (!response.ok) {
+                throw new Error('Failed to save test');
+            }
+
+            const savedTest = await response.json();
+
+            if (editingId) {
+                setTests(tests.map(t => t.id === editingId ? savedTest : t));
+                setSuccess('Medical test updated successfully');
+            } else {
+                setTests([...tests, savedTest]);
+                setSuccess('Medical test added successfully');
+            }
+
             setFormData({
                 testName: '',
                 category: '',
@@ -163,13 +185,29 @@ export default function MedicalTests({ user }) {
                 doctor: '',
                 facility: ''
             });
+            setEditingId(null);
             setShowForm(false);
-            setSuccess('Medical test added successfully');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to add test');
+            setError('Failed to save test');
             console.error(err);
         }
+    };
+
+    const handleEditTest = (test) => {
+        setEditingId(test.id);
+        setFormData({
+            testName: test.testName,
+            category: test.category,
+            status: test.status || 'pending',
+            testDate: test.testDate ? new Date(test.testDate).toISOString().split('T')[0] : '',
+            resultDate: test.resultDate ? new Date(test.resultDate).toISOString().split('T')[0] : '',
+            result: test.result || '',
+            notes: test.notes || '',
+            doctor: test.doctor || '',
+            facility: test.facility || ''
+        });
+        setShowForm(true);
     };
 
     const handleDeleteTest = async (id) => {
@@ -194,9 +232,29 @@ export default function MedicalTests({ user }) {
         }
     };
 
+    const resetForm = () => {
+        setEditingId(null);
+        setFormData({
+            testName: '',
+            category: '',
+            status: 'pending',
+            testDate: '',
+            resultDate: '',
+            result: '',
+            notes: '',
+            doctor: '',
+            facility: ''
+        });
+        setShowForm(false);
+    }
+
     const formatDate = (dateString) => {
         if (!dateString) return '';
-        return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        const d = new Date(dateString);
+        // Add one day to fix timezone offset issues if relying on UTC/Local mixing, 
+        // or just use UTC methods for simple displays. 
+        // For simplicity:
+        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
     if (loading) {
@@ -223,7 +281,7 @@ export default function MedicalTests({ user }) {
                     </div>
                     <button
                         className="add-test-btn"
-                        onClick={() => setShowForm(!showForm)}
+                        onClick={() => { resetForm(); setShowForm(true); }}
                         title="Add new test record"
                     >
                         +
@@ -255,8 +313,8 @@ export default function MedicalTests({ user }) {
             {showForm && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h3>Add New Test</h3>
-                        <form className="test-form" onSubmit={handleAddTest}>
+                        <h3>{editingId ? 'Edit Test' : 'Add New Test'}</h3>
+                        <form className="test-form" onSubmit={handleSaveTest}>
                             <div className="form-group">
                                 <label>Test Name *</label>
                                 <input
@@ -304,9 +362,20 @@ export default function MedicalTests({ user }) {
                                     placeholder="e.g. Normal, High Glucose, Pending"
                                 />
                             </div>
+                            <div className="form-group">
+                                <label>Status</label>
+                                <select
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                >
+                                    {TEST_STATUSES.map(s => (
+                                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="form-actions">
-                                <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
-                                <button type="submit" className="btn-primary">Save</button>
+                                <button type="button" onClick={resetForm}>Cancel</button>
+                                <button type="submit" className="btn-primary">{editingId ? 'Update' : 'Save'}</button>
                             </div>
                         </form>
                     </div>
@@ -371,17 +440,28 @@ export default function MedicalTests({ user }) {
                                                 <div className="message-btn">Messages from Care Team</div>
                                             </div>
                                         </div>
-                                        {/* Optional delete for demo purposes, nicely hidden or small */}
-                                        <button
-                                            className="delete-item-btn"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeleteTest(test.id);
-                                            }}
-                                            title="Delete record"
-                                        >
-                                            ✕
-                                        </button>
+                                        <div className="item-actions">
+                                            <button
+                                                className="action-icon-btn edit-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditTest(test);
+                                                }}
+                                                title="Edit record"
+                                            >
+                                                ✎
+                                            </button>
+                                            <button
+                                                className="action-icon-btn delete-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteTest(test.id);
+                                                }}
+                                                title="Delete record"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             )}
