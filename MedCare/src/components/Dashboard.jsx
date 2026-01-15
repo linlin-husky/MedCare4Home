@@ -107,6 +107,7 @@ function Dashboard({ user, navigateTo }) {
 
   return (
     <div className="dashboard-container">
+
       {/* Top Row */}
       <div className="dashboard-row">
 
@@ -303,6 +304,11 @@ function Dashboard({ user, navigateTo }) {
           </div>
         </div>
 
+      </div>
+
+      {/* Motivational Quote */}
+      <div className="motivational-quote">
+        "You’re allowed to rest, and you’re allowed to hope."
       </div>
 
       {showAddModal && (

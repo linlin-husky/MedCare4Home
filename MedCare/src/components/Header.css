@@ -1,6 +1,6 @@
 .app-header {
-  background: var(--color-bg-secondary);
-  border-bottom: 0.0625rem solid var(--color-border);
+  background: rgb(88, 139, 229);
+  border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -20,18 +20,19 @@
 
 .header-brand {
   flex-shrink: 0;
+  color: #588be5;
 }
 
-.brand-name {
+.title-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: #588be5;
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: opacity var(--transition-fast);
 }
 
-.brand-name:hover {
-  color: var(--color-primary-dark);
+.title-name:hover {
+  opacity: 0.9;
 }
 
 .header-nav {
@@ -43,7 +44,7 @@
 
 .nav-button {
   background: transparent;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -51,37 +52,40 @@
   border: none;
   cursor: pointer;
   position: relative;
+  transition: all 0.2s;
 }
 
 .nav-button:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
 }
 
 .nav-button.active {
-  background: var(--color-primary);
-  color: white;
+  background: white;
+  color: rgb(88, 139, 229);
+  font-weight: 600;
 }
 
 .nav-button.admin-nav {
-  color: var(--color-accent);
+  color: #ffd700;
+  /* Gold for admin/contrast */
 }
 
 .nav-button.admin-nav:hover {
-  background: var(--color-accent);
-  color: white;
+  background: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
 }
 
 .nav-button.admin-nav.active {
-  background: var(--color-accent);
-  color: white;
+  background: #ffd700;
+  color: rgb(88, 139, 229);
 }
 
 .unread-badge {
   position: absolute;
   top: 0;
   right: 0;
-  background: var(--color-danger);
+  background: #ff4444;
   color: white;
   font-size: 0.625rem;
   font-weight: 700;
@@ -90,6 +94,7 @@
   min-width: 1.125rem;
   text-align: center;
   transform: translate(25%, -25%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .header-user {
@@ -110,26 +115,27 @@
 }
 
 .user-info:hover {
-  background: var(--color-bg-tertiary);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .user-name {
   font-weight: 500;
   font-size: 0.875rem;
-  color: var(--color-text);
+  color: white;
 }
 
 .logout-button {
-  background: var(--color-danger);
+  background: rgba(0, 0, 0, 0.2);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all 0.2s;
 }
 
 .logout-button:hover {
-  background: var(--color-danger-light);
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
 }

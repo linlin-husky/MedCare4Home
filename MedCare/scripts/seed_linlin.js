@@ -180,39 +180,43 @@ async function seed() {
         console.log('Adding medical tests...');
         const testData = [
             {
-                testName: 'Cholesterol Screening',
-                category: 'Blood Work',
+                testName: 'MRI - Brain Scan',
+                category: 'Imaging',
                 status: 'scheduled',
                 testDate: new Date(new Date().setDate(new Date().getDate() + 14)), // 2 weeks later
-                doctor: 'Dr. Heart',
-                facility: 'City Lab',
-                notes: 'Fasting required for 12 hours.'
+                doctor: 'Dr. Neuro',
+                facility: 'City General Hospital',
+                notes: 'Follow-up for headaches.'
             },
             {
-                testName: 'Blood Pressure Monitoring',
-                category: 'Cardiac',
+                testName: 'CT Scan - Chest',
+                category: 'Imaging',
                 status: 'completed',
                 testDate: new Date(new Date().setDate(new Date().getDate() - 2)), // 2 days ago
-                result: '120/80 mmHg',
-                doctor: 'Dr. Heart',
-                notes: 'Normal range.'
+                result: 'Normal',
+                doctor: 'Dr. Pulmon',
+                facility: 'Advanced Imaging Center',
+                notes: 'Routine screening.'
             },
             {
-                testName: 'Vital Signs Check',
-                category: 'General',
+                testName: 'Ultrasound - Abdominal',
+                category: 'Imaging',
                 status: 'completed',
                 testDate: new Date(new Date().setDate(new Date().getDate() - 5)), // 5 days ago
-                result: 'Pulse: 72 bpm, Temp: 98.6°F',
-                doctor: 'Nurse Joy',
-                facility: 'Walk-in Clinic'
+                result: 'No abnormalities',
+                doctor: 'Dr. Sono',
+                facility: 'Community Hospital',
+                notes: 'Checked liver and kidneys.'
             },
             {
-                testName: 'Annual Physical',
-                category: 'General',
+                testName: 'Endoscopy',
+                category: 'Procedure',
                 status: 'completed',
                 testDate: new Date(new Date().setMonth(new Date().getMonth() - 1)), // 1 month ago
-                result: 'Normal',
-                doctor: 'Dr. Smith'
+                result: 'Mild gastritis',
+                doctor: 'Dr. Gastro',
+                facility: 'Specialty Clinic',
+                notes: 'Start omeprazole.'
             }
         ];
 

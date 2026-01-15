@@ -8,7 +8,7 @@ function Header({ user, unreadCount, currentPage, onLogout, navigateTo }) {
     <header className="app-header">
       <div className="header-content">
         <div className="header-brand">
-          <h1 className="brand-name" onClick={() => navigateTo('dashboard')}>
+          <h1 className="title-name" onClick={() => navigateTo('dashboard')}>
             Home Medical Care
           </h1>
         </div>

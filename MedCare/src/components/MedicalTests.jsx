@@ -106,6 +106,9 @@ export default function MedicalTests() {
         setFilteredTests(filtered);
     };
 
+    const [isNoteExpanded, setIsNoteExpanded] = useState(false);
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+
     const handleAddTest = async (e) => {
         e.preventDefault();
 
@@ -170,22 +173,9 @@ export default function MedicalTests() {
         }
     };
 
-    const getStatusBadge = (status) => {
-        switch (status) {
-            case 'scheduled':
-                return <span className="badge badge-scheduled">Scheduled</span>;
-            case 'completed':
-                return <span className="badge badge-completed">Completed</span>;
-            case 'pending':
-                return <span className="badge badge-pending">Pending</span>;
-            default:
-                return <span className="badge">{status}</span>;
-        }
-    };
-
     const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString();
+        if (!dateString) return '';
+        return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
     if (loading) {
@@ -194,230 +184,203 @@ export default function MedicalTests() {
 
     return (
         <div className="medical-tests-container">
-            <div className="medical-tests-header">
-                <h1>Medical Tests</h1>
+            <div className="page-header">
+                <h1>Test Results</h1>
                 <button
-                    className="btn btn-primary"
+                    className="add-test-btn"
                     onClick={() => setShowForm(!showForm)}
+                    title="Add new test record"
                 >
-                    {showForm ? 'Cancel' : '+ Add Test'}
+                    +
                 </button>
+            </div>
+
+            {/* Expandable Note */}
+            <div className="expandable-note">
+                <div
+                    className="note-header"
+                    onClick={() => setIsNoteExpanded(!isNoteExpanded)}
+                    role="button"
+                    tabIndex="0"
+                >
+                    <span className="note-title">PLEASE NOTE (click to expand)</span>
+                    <span className={`chevron ${isNoteExpanded ? 'expanded' : ''}`}>▼</span>
+                </div>
+                {isNoteExpanded && (
+                    <div className="note-content">
+                        Medical Tests show results from hospital or clinic visits performed by doctors, excluding home-based tests.
+                    </div>
+                )}
             </div>
 
             {error && <ErrorMessage message={error} onClose={() => setError('')} />}
             {success && <SuccessMessage message={success} />}
 
             {showForm && (
-                <form className="test-form" onSubmit={handleAddTest}>
-                    <div className="form-grid">
-                        <div className="form-group">
-                            <label>Test Name *</label>
-                            <input
-                                type="text"
-                                value={formData.testName}
-                                onChange={(e) => setFormData({ ...formData, testName: e.target.value })}
-                                placeholder="e.g., Complete Blood Count"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Category *</label>
-                            <select
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                required
-                            >
-                                <option value="">Select a category</option>
-                                {TEST_CATEGORIES.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Status</label>
-                            <select
-                                value={formData.status}
-                                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                            >
-                                {TEST_STATUSES.map(status => (
-                                    <option key={status} value={status}>
-                                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Test Date</label>
-                            <input
-                                type="date"
-                                value={formData.testDate}
-                                onChange={(e) => setFormData({ ...formData, testDate: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Result Date</label>
-                            <input
-                                type="date"
-                                value={formData.resultDate}
-                                onChange={(e) => setFormData({ ...formData, resultDate: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Result</label>
-                            <input
-                                type="text"
-                                value={formData.result}
-                                onChange={(e) => setFormData({ ...formData, result: e.target.value })}
-                                placeholder="e.g., Normal, Abnormal"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Doctor</label>
-                            <input
-                                type="text"
-                                value={formData.doctor}
-                                onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
-                                placeholder="Doctor name"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Facility</label>
-                            <input
-                                type="text"
-                                value={formData.facility}
-                                onChange={(e) => setFormData({ ...formData, facility: e.target.value })}
-                                placeholder="Hospital/Lab name"
-                            />
-                        </div>
-
-                        <div className="form-group full-width">
-                            <label>Notes</label>
-                            <textarea
-                                value={formData.notes}
-                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                placeholder="Additional notes..."
-                                rows="3"
-                            />
-                        </div>
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Add New Test</h3>
+                        <form className="test-form" onSubmit={handleAddTest}>
+                            <div className="form-group">
+                                <label>Test Name *</label>
+                                <input
+                                    type="text"
+                                    value={formData.testName}
+                                    onChange={(e) => setFormData({ ...formData, testName: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Category *</label>
+                                <select
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Select a category</option>
+                                    {TEST_CATEGORIES.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Doctor</label>
+                                <input
+                                    type="text"
+                                    value={formData.doctor}
+                                    onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Date</label>
+                                <input
+                                    type="date"
+                                    value={formData.testDate}
+                                    onChange={(e) => setFormData({ ...formData, testDate: e.target.value })}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Result (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={formData.result}
+                                    onChange={(e) => setFormData({ ...formData, result: e.target.value })}
+                                    placeholder="e.g. Normal, High Glucose, Pending"
+                                />
+                            </div>
+                            <div className="form-actions">
+                                <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
+                                <button type="submit" className="btn-primary">Save</button>
+                            </div>
+                        </form>
                     </div>
-
-                    <button type="submit" className="btn btn-primary">Add Medical Test</button>
-                </form>
+                </div>
             )}
 
-            <div className="filters-container">
-                <div className="filter-group">
-                    <label htmlFor="status-select">Status:</label>
-                    <select
-                        id="status-select"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option>All Items</option>
-                        {TEST_STATUSES.map(status => (
-                            <option key={status} value={status}>
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+            <div className="main-layout">
+                {/* Left Content Area */}
+                <div className="left-content">
+                    {/* Search Bar */}
+                    <div className="search-bar-container">
+                        <input
+                            type="text"
+                            placeholder="Search test results"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="main-search-input"
+                        />
+                        <span className="search-icon">🔍</span>
+                        {searchQuery && (
+                            <button
+                                className="clear-search"
+                                onClick={() => setSearchQuery('')}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
 
-                <div className="filter-group">
-                    <label htmlFor="category-select">Category:</label>
-                    <select
-                        id="category-select"
-                        value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                    >
-                        <option>All Categories</option>
-                        {TEST_CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
-                </div>
+                    <div className="results-section">
+                        <h2>Individual Results</h2>
+                        <p className="results-count">Showing {filteredTests.length} of {tests.length}</p>
 
-                <div className="search-group">
-                    <input
-                        type="text"
-                        placeholder="Search items..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-            </div>
-
-            <div className="tests-list">
-                {filteredTests.length === 0 ? (
-                    <p className="no-tests">No medical tests found</p>
-                ) : (
-                    filteredTests.map(test => (
-                        <div key={test.id} className="test-card">
-                            <div className="test-header">
-                                <h3>{test.testName}</h3>
-                                <button
-                                    className="btn btn-danger btn-small"
-                                    onClick={() => handleDeleteTest(test.id)}
-                                >
-                                    Delete
-                                </button>
-                            </div>
-
-                            <div className="test-details">
-                                <div className="detail-row">
-                                    <span className="label">Category:</span>
-                                    <span className="value">{test.category}</span>
+                        <div className="results-list">
+                            {filteredTests.length === 0 ? (
+                                <div className="no-tests-state">
+                                    <p>No test results found.</p>
                                 </div>
-                                <div className="detail-row">
-                                    <span className="label">Status:</span>
-                                    <span className="value">{getStatusBadge(test.status)}</span>
-                                </div>
-                                {test.testDate && (
-                                    <div className="detail-row">
-                                        <span className="label">Test Date:</span>
-                                        <span className="value">{formatDate(test.testDate)}</span>
+                            ) : (
+                                filteredTests.map(test => (
+                                    <div key={test.id} className="result-item">
+                                        <div className="result-icon">
+                                            <svg viewBox="0 0 24 24" className="beaker-icon">
+                                                <path fill="currentColor" d="M21,2H3V4H5V16C5,18.76 7.24,21 10,21H14C16.76,21 19,18.76 19,16V4H21V2M15,16H9V4H15V16Z" />
+                                            </svg>
+                                        </div>
+                                        <div className="result-info">
+                                            <h3 className="result-name">{test.testName}</h3>
+                                            {test.result && <div className="result-value">{test.result}</div>}
+                                            <div className="result-date">
+                                                {formatDate(test.testDate || test.resultDate)}
+                                            </div>
+                                        </div>
+                                        <div className="result-doctor">
+                                            <div className="doc-avatar">
+                                                <svg viewBox="0 0 24 24" fill="#fff">
+                                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                                </svg>
+                                            </div>
+                                            <div className="doc-details">
+                                                <div className="doc-name">{test.doctor || 'Unknown Doctor'}</div>
+                                                <div className="message-btn">Messages from Care Team</div>
+                                            </div>
+                                        </div>
+                                        {/* Optional delete for demo purposes, nicely hidden or small */}
+                                        <button
+                                            className="delete-item-btn"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteTest(test.id);
+                                            }}
+                                            title="Delete record"
+                                        >
+                                            ✕
+                                        </button>
                                     </div>
-                                )}
-                                {test.resultDate && (
-                                    <div className="detail-row">
-                                        <span className="label">Result Date:</span>
-                                        <span className="value">{formatDate(test.resultDate)}</span>
-                                    </div>
-                                )}
-                                {test.result && (
-                                    <div className="detail-row">
-                                        <span className="label">Result:</span>
-                                        <span className="value">{test.result}</span>
-                                    </div>
-                                )}
-                                {test.doctor && (
-                                    <div className="detail-row">
-                                        <span className="label">Doctor:</span>
-                                        <span className="value">{test.doctor}</span>
-                                    </div>
-                                )}
-                                {test.facility && (
-                                    <div className="detail-row">
-                                        <span className="label">Facility:</span>
-                                        <span className="value">{test.facility}</span>
-                                    </div>
-                                )}
-                                {test.notes && (
-                                    <div className="detail-row">
-                                        <span className="label">Notes:</span>
-                                        <span className="value">{test.notes}</span>
-                                    </div>
-                                )}
-                            </div>
+                                ))
+                            )}
                         </div>
-                    ))
-                )}
+                    </div>
+                </div>
+
+                {/* Right Sidebar */}
+                <div className="right-sidebar">
+                    <div className="sidebar-section">
+                        <div
+                            className="sidebar-header"
+                            onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+                        >
+                            <h3>Settings and filters</h3>
+                            <span className={`chevron ${isSidebarExpanded ? 'expanded' : ''}`}>▼</span>
+                        </div>
+
+                        {isSidebarExpanded && (
+                            <div className="sidebar-content">
+                                <div className="filter-option">
+                                    <p>Show results from hospital visits?</p>
+                                    <div className="toggle-group">
+                                        <button className="toggle-btn active">Yes</button>
+                                        <button className="toggle-btn">No</button>
+                                    </div>
+                                </div>
+                                <div className="sidebar-link">
+                                    <span className="edit-icon">✎</span>
+                                    <a href="#preferences">Test result preferences</a>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

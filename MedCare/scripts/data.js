@@ -296,15 +296,15 @@ async function importData() {
         const medicalTests = [
             {
                 username: testUsername,
-                testName: 'Complete Blood Count (CBC)',
-                category: 'Blood Work',
+                testName: 'MRI - Spine',
+                category: 'Imaging',
                 status: 'completed',
                 testDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
                 resultDate: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000),
-                result: 'Normal',
-                notes: 'All values within normal range',
-                doctor: 'Dr. Johnson',
-                facility: 'Lab Services'
+                result: 'Mild disc herniation',
+                notes: 'L4-L5 disc issue',
+                doctor: 'Dr. Ortho',
+                facility: 'Spine Center'
             },
             {
                 username: testUsername,
