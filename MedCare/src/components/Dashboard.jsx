@@ -80,72 +80,71 @@ function DashboardContent({ user, navigateTo, selectedUsername, setSelectedUsern
     // Fetch initial data
     const fetchData = async () => {
       try {
-        try {
-          // Fetch Profile for selected user
-          if (selectedUsername) {
-            try {
-              if (selectedUsername === user.username) {
-                const profile = await api.getPublicProfile(selectedUsername);
-                setDisplayUser(profile.user || profile);
-              } else {
-                const profile = await api.getPublicProfile(selectedUsername);
-                setDisplayUser(profile.user || profile);
-              }
-            } catch (profileErr) {
-              console.warn(`Could not fetch profile for ${selectedUsername}, using fallback.`, profileErr);
-              // Fallback for family members who don't have a full User account
-              if (user && user.familyMembers) {
-                const member = user.familyMembers.find(m => m.username === selectedUsername);
-                if (member) {
-                  setDisplayUser({
-                    displayName: member.name,
-                    username: member.username,
-                    relation: member.relation,
-                    // We don't have height/weight in familyMembers array, will default to '-'
-                  });
-                }
+        // Fetch Profile for selected user
+        if (selectedUsername) {
+          try {
+            if (selectedUsername === user.username) {
+              const profile = await api.getPublicProfile(selectedUsername);
+              setDisplayUser(profile.user || profile);
+            } else {
+              const profile = await api.getPublicProfile(selectedUsername);
+              setDisplayUser(profile.user || profile);
+            }
+          } catch (profileErr) {
+            console.warn(`Could not fetch profile for ${selectedUsername}, using fallback.`, profileErr);
+            // Fallback for family members who don't have a full User account
+            if (user && user.familyMembers) {
+              const member = user.familyMembers.find(m => m.username === selectedUsername);
+              if (member) {
+                setDisplayUser({
+                  displayName: member.name,
+                  username: member.username,
+                  relation: member.relation,
+                  // We don't have height/weight in familyMembers array, will default to '-'
+                });
               }
             }
           }
-
-          const appts = await api.getAppointments(selectedUsername);
-          if (appts && Array.isArray(appts.appointments)) {
-            setAppointments(appts.appointments);
-          } else if (Array.isArray(appts)) {
-            setAppointments(appts);
-          }
-
-          const meds = await api.getMedications(selectedUsername);
-          if (meds && Array.isArray(meds.medications)) {
-            setMedications(meds.medications);
-          } else if (Array.isArray(meds)) {
-            setMedications(meds);
-          }
-
-          const vitals = await api.getVitals('weight', selectedUsername);
-          const vList = vitals && (vitals.vitals || vitals);
-          if (Array.isArray(vList)) {
-            const weights = vList.map(v => v.value);
-            if (weights.length > 0) setWeightData(weights);
-            else setWeightData([]);
-          } else {
-            setWeightData([]);
-          }
-
-          const tests = await api.getMedicalTests(selectedUsername);
-          const tList = tests && (tests.tests || tests);
-          if (Array.isArray(tList)) {
-            setMedicalTests(tList);
-          } else {
-            setMedicalTests([]);
-          }
-
-        } catch (err) {
-          console.error('Failed to fetch dashboard data', err);
         }
-      };
-      fetchData();
-    }, [user, selectedUsername]); // Re-fetch if user or selectedUsername changes
+
+        const appts = await api.getAppointments(selectedUsername);
+        if (appts && Array.isArray(appts.appointments)) {
+          setAppointments(appts.appointments);
+        } else if (Array.isArray(appts)) {
+          setAppointments(appts);
+        }
+
+        const meds = await api.getMedications(selectedUsername);
+        if (meds && Array.isArray(meds.medications)) {
+          setMedications(meds.medications);
+        } else if (Array.isArray(meds)) {
+          setMedications(meds);
+        }
+
+        const vitals = await api.getVitals('weight', selectedUsername);
+        const vList = vitals && (vitals.vitals || vitals);
+        if (Array.isArray(vList)) {
+          const weights = vList.map(v => v.value);
+          if (weights.length > 0) setWeightData(weights);
+          else setWeightData([]);
+        } else {
+          setWeightData([]);
+        }
+
+        const tests = await api.getMedicalTests(selectedUsername);
+        const tList = tests && (tests.tests || tests);
+        if (Array.isArray(tList)) {
+          setMedicalTests(tList);
+        } else {
+          setMedicalTests([]);
+        }
+
+      } catch (err) {
+        console.error('Failed to fetch dashboard data', err);
+      }
+    };
+    fetchData();
+  }, [user, selectedUsername]); // Re-fetch if user or selectedUsername changes
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newAppt, setNewAppt] = useState({
