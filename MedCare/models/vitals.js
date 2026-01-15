@@ -60,6 +60,7 @@ async function removeVital(id, username) {
     await Vitals.deleteOne({ id, username: username.toLowerCase() });
 }
 
+export { Vitals };
 export default {
     addVital,
     getVitals,

@@ -275,23 +275,11 @@ async function searchUsers(query) {
   }));
 }
 
+// ... existing exports
+export { User }; // Named export for direct access
 export default {
+  // ... existing default export object
   sanitizeInput,
-  isValidUsername,
-  isBannedUser,
-  isAdmin,
-  userExists,
-  createUser,
-  getUser,
-  updateUser,
-  updateTrustScore,
-  addRating,
-  recordReturn,
-  recordDispute,
-  incrementLendings,
-  incrementBorrowings,
-  getTrustBadge,
-  getPublicProfile,
-  getAllUsers,
-  searchUsers
+  // ...
+  User // Also add to default object if needed, but named is better
 };
